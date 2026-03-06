@@ -7,10 +7,8 @@
         :root { --grama: #2e7d32; --pista: #455a64; --gold: #ffd700; }
         body { margin: 0; background: #1a1a1a; color: white; font-family: sans-serif; overflow: hidden; }
         
-        /* Cabeçalho */
         header { background: rgba(0,0,0,0.8); padding: 10px; text-align: center; border-bottom: 3px solid var(--gold); }
         
-        /* Arena de Batalha */
         #arena { 
             position: relative; 
             width: 100vw; 
@@ -20,7 +18,6 @@
             padding-top: 50px;
         }
 
-        /* Personagem */
         .player-container {
             position: absolute;
             left: 50px;
@@ -60,13 +57,8 @@
             border: 2px solid black;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
-        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
-        /* Linha de Chegada */
         #finish-line {
             position: absolute;
             right: 120px;
@@ -77,44 +69,18 @@
             border-left: 2px solid white;
         }
 
-        /* Pódio de Vitória */
         #podio { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.95); 
-            z-index: 1000; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            color: var(--gold); 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; 
+            align-items: center; justify-content: center; color: var(--gold); 
         }
 
-        /* Menu de Admin (Truque sugerido) */
         #admin-menu {
-            position: fixed;
-            bottom: 15px;
-            right: 15px;
-            opacity: 0.1; /* Quase invisível */
-            transition: 0.4s;
-            background: rgba(0,0,0,0.8);
-            padding: 10px;
-            border-radius: 8px;
-            display: flex;
-            gap: 10px;
-            z-index: 2000;
+            position: fixed; bottom: 15px; right: 15px; opacity: 0.1; transition: 0.4s;
+            background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; display: flex; gap: 10px; z-index: 2000;
         }
-        #admin-menu:hover { opacity: 1; } /* Aparece ao passar o mouse */
-        
-        .admin-btn {
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 5px;
-            border: none;
-            font-weight: bold;
-            font-size: 12px;
-        }
+        #admin-menu:hover { opacity: 1; }
+        .admin-btn { cursor: pointer; padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -123,7 +89,7 @@
     <h1 style="font-size: 120px; margin: 0;">🏆</h1>
     <h1 id="vencedor-nome" style="font-size: 60px; text-transform: uppercase;">NOME</h1>
     <h2 style="color: white;">CONQUISTOU A VITÓRIA SUPREMA!</h2>
-    <button onclick="location.reload()" style="margin-top:30px; padding: 15px 40px; font-size: 20px; cursor: pointer; border-radius: 50px; border: none; background: var(--gold); color: black; font-weight: bold; box-shadow: 0 0 20px var(--gold);">REINICIAR BATALHA</button>
+    <button onclick="location.reload()" style="margin-top:30px; padding: 15px 40px; font-size: 20px; cursor: pointer; border-radius: 50px; border: none; background: var(--gold); color: black; font-weight: bold;">REINICIAR BATALHA</button>
 </div>
 
 <header>
@@ -142,9 +108,8 @@
 </div>
 
 <script type="module">
-    // --- IMPORTAÇÕES DO FIREBASE ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
     authDomain: "yvypoty-491e8.firebaseapp.com",
@@ -156,73 +121,78 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
     const arena = document.getElementById('arena');
     const players = {};
-    const emojis = ["🧙‍♂️", "🧝‍♀️", "🦸‍♂️", "🥷", "🤖", "🧛‍♂️", "🦁", "🐉"];
 
-    // --- LÓGICA DE MOVIMENTAÇÃO ---
-    function atualizarOuCriarJogador(nome, acertos) {
+    // MELHORIA: A função agora recebe o objeto 'dados' inteiro para ler o Sprite e os Acertos
+    function atualizarOuCriarJogador(nome, dados) {
+        let acertos = dados.acertos || 0;
+        let icone = dados.sprite || "⏳"; // Mostra ampulheta se ele ainda estiver escolhendo
+
         if (!players[nome]) {
             const container = document.createElement('div');
             container.id = `p-${nome}`;
             container.className = 'player-container';
-            
-            // Define uma altura aleatória para as "raias"
             container.style.top = (Math.random() * 65 + 10) + "%";
-            
-            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
             
             container.innerHTML = `
                 <div class="score-bubble" id="score-${nome}">0</div>
-                <div class="avatar">${randomEmoji}</div>
+                <div class="avatar" id="avatar-${nome}">${icone}</div>
                 <div class="name-tag">${nome}</div>
             `;
             
             arena.appendChild(container);
             players[nome] = true;
             document.getElementById('count').innerText = Object.keys(players).length;
+        } else {
+            // Atualiza o desenho se ele escolheu o herói depois de entrar
+            document.getElementById(`avatar-${nome}`).innerText = icone;
         }
 
         const pElement = document.getElementById(`p-${nome}`);
         const sElement = document.getElementById(`score-${nome}`);
         
-        // Ajuste de movimento para a linha de chegada (8% da tela por acerto)
+        // MELHORIA: Move o boneco baseado na quantidade de acertos
         const novaPosicao = 50 + (acertos * (window.innerWidth / 12.5)); 
         pElement.style.left = novaPosicao + "px";
         sElement.innerText = acertos;
 
-        // Efeito visual de movimento (pulo)
-        pElement.style.marginTop = "-25px";
-        setTimeout(() => pElement.style.marginTop = "0px", 250);
+        // Pula apenas quando o aluno pontua
+        if(acertos > 0) {
+            pElement.style.marginTop = "-25px";
+            setTimeout(() => pElement.style.marginTop = "0px", 250);
+        }
 
-        // Gatilho de Vitória
         if (acertos >= 10) {
             document.getElementById('vencedor-nome').innerText = nome;
             document.getElementById('podio').style.display = 'flex';
         }
     }
 
-    // --- ESCUTA EM TEMPO REAL ---
     onSnapshot(collection(db, "jogadores"), (snapshot) => {
         snapshot.docChanges().forEach((change) => {
             const dados = change.doc.data();
             const nome = change.doc.id;
-            atualizarOuCriarJogador(nome, dados.acertos);
+            atualizarOuCriarJogador(nome, dados);
         });
     });
 
-    // --- FUNÇÃO DE RESET (ADMIN) ---
     window.resetarTudo = async () => {
-        if(confirm("ATENÇÃO: Isso vai expulsar todos os alunos da arena e zerar o placar. Continuar?")) {
-            const querySnapshot = await getDocs(collection(db, "jogadores"));
-            const promessas = querySnapshot.docs.map(d => deleteDoc(doc(db, "jogadores", d.id)));
-            await Promise.all(promessas);
-            alert("Arena limpa com sucesso!");
+        if(confirm("ATENÇÃO: Isso vai expulsar todos da arena, zerar os personagens ocupados e zerar o placar. Continuar?")) {
+            // Limpa jogadores
+            const queryJogadores = await getDocs(collection(db, "jogadores"));
+            const promessasJogadores = queryJogadores.docs.map(d => deleteDoc(doc(db, "jogadores", d.id)));
+            await Promise.all(promessasJogadores);
+            
+            // Limpa os personagens ocupados
+            await updateDoc(doc(db, "configuracao", "personagens"), {
+                mago: "", elfo: "", guerreiro: "", ninja: "", robo: "", vampiro: ""
+            });
+
+            alert("Arena completamente limpa!");
             location.reload();
         }
     }
 </script>
 </body>
 </html>
-
