@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - RPG Educativo</title>
+    <title>Login - Arena RPG</title>
     <style>
-        body { background: #121212; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #1e1e1e; padding: 30px; border-radius: 15px; text-align: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input { width: 90%; padding: 12px; margin: 15px 0; border-radius: 8px; border: none; }
-        button { width: 100%; padding: 12px; background: #6200ea; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body { background: #0f0f1a; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #1c1c2d; padding: 30px; border-radius: 20px; text-align: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #8e44ad; }
+        input { width: 90%; padding: 12px; margin: 15px 0; border-radius: 10px; border: none; background: #2a2a40; color: white; text-align: center; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #8e44ad; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        button:hover { background: #9b59b6; transform: scale(1.05); }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>Entrar na Arena</h2>
-        <input type="text" id="nome" placeholder="Seu Nome ou Apelido">
-        <button id="btnEntrar">INICIAR JOGO</button>
+        <h2>⚔️ Entrar na Batalha</h2>
+        <input type="text" id="nome" placeholder="Digite seu Nickname">
+        <button id="btnEntrar">AVANÇAR</button>
     </div>
 
     <script type="module">
@@ -29,15 +30,21 @@
     messagingSenderId: "338156073833",
     appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
     measurementId: "G-W93E7TJ59V"};
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         document.getElementById('btnEntrar').onclick = async () => {
-            const nome = document.getElementById('nome').value.trim();
-            if (nome) {
-                await setDoc(doc(db, "jogadores", nome), { acertos: 0, status: "online" });
-                localStorage.setItem("usuario", nome);
-                window.location.href = "jogo.html";
+            const nick = document.getElementById('nome').value.trim();
+            if (nick) {
+                // Registra o jogador no banco com 0 pontos e um ícone de "aguardando"
+                await setDoc(doc(db, "jogadores", nick), { acertos: 0, status: "online", sprite: "⏳" });
+                localStorage.setItem("usuarioAtivo", nick);
+                
+                // MELHORIA: Envia para a seleção de heróis
+                window.location.href = "selecao.html";
+            } else {
+                alert("Por favor, digite um nome!");
             }
         };
     </script>
