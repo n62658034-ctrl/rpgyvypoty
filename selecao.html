@@ -6,57 +6,54 @@
     <title>Escolha seu Herói</title>
     <style>
         body { background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 500px; margin: 0 auto; margin-top: 30px; }
+        /* Aumentei as colunas para caber mais personagens na tela */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; max-width: 800px; margin: 0 auto; margin-top: 30px; }
         .hero-card { 
-            background: #1e1e1e; padding: 20px; border-radius: 15px; border: 2px solid #333; cursor: pointer;
-            transition: 0.3s; position: relative;
+            background: #1e1e1e; padding: 15px; border-radius: 15px; border: 2px solid #333; cursor: pointer;
+            transition: 0.3s; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .hero-card:hover:not(.taken) { border-color: #6200ea; transform: scale(1.05); }
         .hero-card.taken { opacity: 0.3; cursor: not-allowed; border-color: #cf6679; }
-        .hero-card.taken::after { content: "OCUPADO"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #cf6679; font-weight: bold; background: rgba(0,0,0,0.8); padding: 5px; border-radius: 5px;}
-        .avatar { font-size: 50px; margin-bottom: 10px; }
+        .hero-card.taken::after { content: "OCUPADO"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #cf6679; font-weight: bold; background: rgba(0,0,0,0.8); padding: 5px; border-radius: 5px; font-size: 12px;}
+        .avatar { font-size: 40px; margin-bottom: 5px; }
+        .nome-heroi { font-size: 14px; font-weight: bold; }
     </style>
 </head>
 <body>
     <h2>ESCOLHA SEU GUERREIRO</h2>
-    <p>O personagem ficará bloqueado para os outros.</p>
+    <p>O personagem ficará bloqueado para os outros colegas.</p>
     
-    <div class="grid" id="hero-grid">
-        </div>
+    <div class="grid" id="hero-grid"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
-    authDomain: "yvypoty-491e8.firebaseapp.com",
-    projectId: "yvypoty-491e8",
-    storageBucket: "yvypoty-491e8.firebasestorage.app",
-    messagingSenderId: "338156073833",
-    appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
-    measurementId: "G-W93E7TJ59V"};
+        const firebaseConfig = { 
+            /* COLE SUAS CHAVES AQUI */ 
+        };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Lista de heróis disponíveis
+        // A GRANDE LISTA DE 20 PERSONAGENS
         const heroisIniciais = [
-            { id: 'mago', nome: 'Mago', sprite: '🧙‍♂️' },
-            { id: 'elfo', nome: 'Elfo', sprite: '🧝‍♀️' },
-            { id: 'guerreiro', nome: 'Guerreiro', sprite: '🦸‍♂️' },
-            { id: 'ninja', nome: 'Ninja', sprite: '🥷' },
-            { id: 'robo', nome: 'Ciborgue', sprite: '🤖' },
-            { id: 'vampiro', nome: 'Vampiro', sprite: '🧛‍♂️' }
+            { id: 'mago', nome: 'Mago', sprite: '🧙‍♂️' }, { id: 'elfa', nome: 'Elfa', sprite: '🧝‍♀️' },
+            { id: 'guerreiro', nome: 'Guerreiro', sprite: '🦸‍♂️' }, { id: 'ninja', nome: 'Ninja', sprite: '🥷' },
+            { id: 'robo', nome: 'Ciborgue', sprite: '🤖' }, { id: 'vampiro', nome: 'Vampiro', sprite: '🧛‍♂️' },
+            { id: 'zumbi', nome: 'Zumbi', sprite: '🧟‍♂️' }, { id: 'fada', nome: 'Fada', sprite: '🧚‍♀️' },
+            { id: 'sereia', nome: 'Sereia', sprite: '🧜‍♀️' }, { id: 'genio', nome: 'Gênio', sprite: '🧞‍♂️' },
+            { id: 'astronauta', nome: 'Astronauta', sprite: '🧑‍🚀' }, { id: 'detetive', nome: 'Detetive', sprite: '🕵️' },
+            { id: 'pirata', nome: 'Pirata', sprite: '🏴‍☠️' }, { id: 'rei', nome: 'Rei', sprite: '🤴' },
+            { id: 'rainha', nome: 'Rainha', sprite: '👸' }, { id: 'heroina', nome: 'Heroína', sprite: '🦸‍♀️' },
+            { id: 'alien', nome: 'Alien', sprite: '👽' }, { id: 'fantasma', nome: 'Fantasma', sprite: '👻' },
+            { id: 'palhaco', nome: 'Palhaço', sprite: '🤡' }, { id: 'ogro', nome: 'Ogro', sprite: '👹' }
         ];
 
         const grid = document.getElementById('hero-grid');
         const nick = localStorage.getItem("usuarioAtivo");
 
-        if(!nick) {
-            alert("Erro: Você não fez login!");
-            window.location.href = "index.html";
-        }
+        if(!nick) { alert("Erro: Faça login primeiro!"); window.location.href = "index.html"; }
 
-        // Fica vigiando o Firebase para ver quem já foi escolhido
         onSnapshot(doc(db, "configuracao", "personagens"), (snap) => {
             const ocupados = snap.data() || {};
             grid.innerHTML = "";
@@ -65,27 +62,21 @@
                 const isTaken = ocupados[hero.id] && ocupados[hero.id] !== nick;
                 const div = document.createElement('div');
                 div.className = `hero-card ${isTaken ? 'taken' : ''}`;
-                div.innerHTML = `<div class="avatar">${hero.sprite}</div><div>${hero.nome}</div>`;
+                div.innerHTML = `<div class="avatar">${hero.sprite}</div><div class="nome-heroi">${hero.nome}</div>`;
                 
-                if (!isTaken) {
-                    div.onclick = () => selecionar(hero);
-                }
+                if (!isTaken) div.onclick = () => selecionar(hero);
                 grid.appendChild(div);
             });
         });
 
         async function selecionar(hero) {
-            // 1. Bloqueia o herói para a turma
             const refConfig = doc(db, "configuracao", "personagens");
             await updateDoc(refConfig, { [hero.id]: nick });
             
-            // 2. MELHORIA: Salva o desenho no perfil do jogador para a Dashboard ler
             const refJogador = doc(db, "jogadores", nick);
             await updateDoc(refJogador, { sprite: hero.sprite });
             
-            // 3. Salva no celular e vai para o RPG
             localStorage.setItem("meuHeroi", hero.sprite);
-            localStorage.setItem("heroiID", hero.id);
             window.location.href = "jogo.html";
         }
     </script>
