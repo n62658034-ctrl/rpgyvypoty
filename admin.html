@@ -10,8 +10,14 @@
         h2 { color: #e94560; text-align: center; margin-bottom: 25px; }
         label { display: block; margin-top: 15px; font-size: 14px; color: #add8e6; }
         input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 8px; border: none; background: #0f3460; color: white; box-sizing: border-box; }
+        
+        /* Botões */
         .btn-salvar { width: 100%; padding: 15px; margin-top: 30px; background: #e94560; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-salvar:hover { background: #ff4d6d; transform: scale(1.02); }
+        
+        .btn-apagar { width: 100%; padding: 15px; margin-top: 15px; background: #c0392b; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; border: 1px solid #ff7979; }
+        .btn-apagar:hover { background: #e74c3c; transform: scale(1.02); }
+
         .opcoes-group { border: 1px solid #1f4068; padding: 15px; border-radius: 10px; margin-top: 10px; }
         .nav-link { display: block; text-align: center; margin-top: 20px; color: #8e44ad; text-decoration: none; font-size: 14px; }
     </style>
@@ -46,28 +52,26 @@
         <option value="3">Opção 3 (D)</option>
     </select>
 
-    <button class="btn-salvar" id="btnSalvar">SALVAR NO BANCO DE DADOS</button>
+    <button class="btn-salvar" id="btnSalvar">➕ SALVAR NO BANCO DE DADOS</button>
+    
+    <button class="btn-apagar" onclick="apagarTodasPerguntas()">🗑️ APAGAR TODAS AS PERGUNTAS</button>
     
     <a href="dashboard.html" class="nav-link">Voltar para a Arena 🏟️</a>
 </div>
 
 <script type="module">
-    // --- IMPORTAÇÕES DO FIREBASE ---
+    // --- IMPORTAÇÕES DO FIREBASE (Agora incluindo getDocs e deleteDoc) ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
-    authDomain: "yvypoty-491e8.firebaseapp.com",
-    projectId: "yvypoty-491e8",
-    storageBucket: "yvypoty-491e8.firebasestorage.app",
-    messagingSenderId: "338156073833",
-    appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
-    measurementId: "G-W93E7TJ59V"};
+    const firebaseConfig = {
+        /* COLOQUE SUAS CHAVES AQUI */
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- FUNÇÃO PARA SALVAR ---
+    // --- FUNÇÃO PARA SALVAR A PERGUNTA ---
     document.getElementById('btnSalvar').onclick = async () => {
         const pergunta = document.getElementById('txt-pergunta').value;
         const o0 = document.getElementById('opt0').value;
@@ -76,7 +80,6 @@
         const o3 = document.getElementById('opt3').value;
         const corretaIndex = parseInt(document.getElementById('select-correta').value);
 
-        // Validação simples
         if (!pergunta || !o0 || !o1) {
             alert("Por favor, preencha a pergunta e pelo menos duas opções!");
             return;
@@ -85,27 +88,47 @@
         const novaQuestao = {
             enunciado: pergunta,
             opcoes: [o0, o1, o2, o3],
-            correta: corretaIndex,
-            timestamp: Date.now() // Útil para organizar as perguntas se quiser
+            correta: corretaIndex
         };
 
         try {
             await addDoc(collection(db, "perguntas"), novaQuestao);
             alert("✅ Pergunta cadastrada com sucesso!");
             
-            // Limpa os campos para a próxima pergunta
+            // Limpa os campos para a próxima
             document.getElementById('txt-pergunta').value = "";
             document.getElementById('opt0').value = "";
             document.getElementById('opt1').value = "";
             document.getElementById('opt2').value = "";
             document.getElementById('opt3').value = "";
         } catch (error) {
-            console.error("Erro ao salvar:", error);
-            alert("❌ Erro ao salvar no Firebase. Verifique o console.");
+            alert("❌ Erro ao salvar no Firebase.");
+        }
+    };
+
+    // --- NOVA FUNÇÃO PARA APAGAR TODAS AS PERGUNTAS ---
+    window.apagarTodasPerguntas = async () => {
+        // O confirm cria uma janela de alerta para evitar cliques acidentais
+        if (confirm("⚠️ TEM CERTEZA? Isso vai apagar TODAS as perguntas antigas do banco de dados e não tem volta!")) {
+            try {
+                // 1. Pega todas as perguntas da coleção
+                const querySnapshot = await getDocs(collection(db, "perguntas"));
+                
+                // 2. Cria uma lista de "promessas" para deletar cada uma delas
+                const promessasDeletar = querySnapshot.docs.map(documento => {
+                    return deleteDoc(doc(db, "perguntas", documento.id));
+                });
+                
+                // 3. Executa a deleção de todas ao mesmo tempo
+                await Promise.all(promessasDeletar);
+                
+                alert("🗑️ O Banco de Perguntas foi esvaziado! Você já pode cadastrar as perguntas da nova rodada.");
+            } catch (erro) {
+                alert("❌ Erro ao apagar perguntas: " + erro);
+            }
         }
     };
 </script>
 
 </body>
 </html>
-
