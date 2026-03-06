@@ -2,22 +2,25 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escolha seu Herói</title>
     <style>
         body { background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 500px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 500px; margin: 0 auto; margin-top: 30px; }
         .hero-card { 
             background: #1e1e1e; padding: 20px; border-radius: 15px; border: 2px solid #333; cursor: pointer;
             transition: 0.3s; position: relative;
         }
         .hero-card:hover:not(.taken) { border-color: #6200ea; transform: scale(1.05); }
         .hero-card.taken { opacity: 0.3; cursor: not-allowed; border-color: #cf6679; }
-        .hero-card.taken::after { content: "OCUPADO"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #cf6679; font-weight: bold; }
-        .avatar { font-size: 50px; }
+        .hero-card.taken::after { content: "OCUPADO"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #cf6679; font-weight: bold; background: rgba(0,0,0,0.8); padding: 5px; border-radius: 5px;}
+        .avatar { font-size: 50px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <h1>ESCOLHA SEU GUERREIRO</h1>
+    <h2>ESCOLHA SEU GUERREIRO</h2>
+    <p>O personagem ficará bloqueado para os outros.</p>
+    
     <div class="grid" id="hero-grid">
         </div>
 
@@ -35,22 +38,25 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Lista de heróis disponíveis
         const heroisIniciais = [
             { id: 'mago', nome: 'Mago', sprite: '🧙‍♂️' },
             { id: 'elfo', nome: 'Elfo', sprite: '🧝‍♀️' },
-            { id: 'cavalheiro', nome: 'Guerreiro', sprite: '🦸‍♂️' },
-            { id: 'ninja', nome: 'Ninja', sprite: '🥷' }
-            { id: 'Coração', nome: 'Coração', sprite: '❤️' }
-            { id: 'Raposa', nome: 'Raposa', sprite: '🦊' }
-            { id: 'Pinguin', nome: 'Pinguin', sprite: '🐧' }
-            { id: 'Detetive', nome: 'Detetive', sprite: '🕵️' }
-            { id: 'Hallow', nome: 'Hallow', sprite: '🎃' }
+            { id: 'guerreiro', nome: 'Guerreiro', sprite: '🦸‍♂️' },
+            { id: 'ninja', nome: 'Ninja', sprite: '🥷' },
+            { id: 'robo', nome: 'Ciborgue', sprite: '🤖' },
+            { id: 'vampiro', nome: 'Vampiro', sprite: '🧛‍♂️' }
         ];
 
         const grid = document.getElementById('hero-grid');
         const nick = localStorage.getItem("usuarioAtivo");
 
-        // Escuta em tempo real quais heróis estão ocupados
+        if(!nick) {
+            alert("Erro: Você não fez login!");
+            window.location.href = "index.html";
+        }
+
+        // Fica vigiando o Firebase para ver quem já foi escolhido
         onSnapshot(doc(db, "configuracao", "personagens"), (snap) => {
             const ocupados = snap.data() || {};
             grid.innerHTML = "";
@@ -69,18 +75,19 @@
         });
 
         async function selecionar(hero) {
-            // Salva no Firebase que este herói agora é seu
-            const ref = doc(db, "configuracao", "personagens");
-            await updateDoc(ref, { [hero.id]: nick });
+            // 1. Bloqueia o herói para a turma
+            const refConfig = doc(db, "configuracao", "personagens");
+            await updateDoc(refConfig, { [hero.id]: nick });
             
-            // Salva localmente para usar no jogo
+            // 2. MELHORIA: Salva o desenho no perfil do jogador para a Dashboard ler
+            const refJogador = doc(db, "jogadores", nick);
+            await updateDoc(refJogador, { sprite: hero.sprite });
+            
+            // 3. Salva no celular e vai para o RPG
             localStorage.setItem("meuHeroi", hero.sprite);
             localStorage.setItem("heroiID", hero.id);
-            
-            // Vai para o jogo
             window.location.href = "jogo.html";
         }
     </script>
 </body>
-
 </html>
