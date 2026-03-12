@@ -3,118 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPG de Conhecimento - Batalha Real</title>
+    <title>Login - Arena RPG</title>
     <style>
-        :root { --primary: #6200ea; --secondary: #03dac6; --danger: #cf6679; --bg: #121212; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        #arena { width: 90%; max-width: 500px; background: #1e1e1e; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 2px solid #333; }
-        .stats { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .bar-container { width: 45%; background: #333; height: 15px; border-radius: 10px; overflow: hidden; border: 1px solid #555; }
-        .bar-fill { height: 100%; transition: width 0.4s ease-out; }
-        #player-hp { background: var(--secondary); width: 100%; }
-        #enemy-hp { background: var(--danger); width: 100%; }
-        #entity-display { display: flex; justify-content: space-around; font-size: 50px; margin: 20px 0; }
-        #question-box { background: #2c2c2c; padding: 15px; border-radius: 10px; margin-bottom: 20px; min-height: 80px; display: flex; align-items: center; justify-content: center; }
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { padding: 12px; border: none; border-radius: 8px; background: #3d3d3d; color: white; cursor: pointer; transition: 0.2s; font-weight: bold; }
-        button:hover { background: var(--primary); transform: translateY(-2px); }
-        .feedback { margin-top: 15px; font-style: italic; color: var(--secondary); height: 20px; }
+        body { background: #0f0f1a; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #1c1c2d; padding: 30px; border-radius: 20px; text-align: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #8e44ad; }
+        input, select { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; background: #2a2a40; color: white; text-align: center; font-size: 16px; }
+        button { width: 100%; padding: 12px; margin-top: 15px; background: #8e44ad; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        button:hover { background: #9b59b6; transform: scale(1.05); }
     </style>
 </head>
 <body>
+    <div class="card">
+        <h2>⚔️ Entrar na Batalha</h2>
+        <input type="text" id="nome" placeholder="Digite seu Nickname">
+        
+        <select id="disciplina">
+            <option value="" disabled selected>Escolha a Disciplina...</option>
+            <option value="matematica">Matemática</option>
+            <option value="portugues">Português</option>
+            <option value="biologia">Biologia</option>
+            <option value="historia">História</option>
+            <option value="geografia">Geografia</option>
+            <option value="fisica">Física</option>
+            <option value="quimica">Química</option>
+        </select>
 
-<div id="arena">
-    <div class="stats">
-        <div>VOCÊ <div class="bar-container"><div id="player-hp" class="bar-fill"></div></div></div>
-        <div>MONSTRO <div class="bar-container"><div id="enemy-hp" class="bar-fill"></div></div></div>
+        <button id="btnEntrar">AVANÇAR</button>
     </div>
 
-    <div id="entity-display">
-        <div id="p-sprite">🧙‍♂️</div>
-        <div id="e-sprite">🐲</div>
-    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    <div id="question-box"><p id="txt-pergunta">Carregando desafio...</p></div>
-    <div class="options" id="btn-options"></div>
-    <p class="feedback" id="feedback-msg"></p>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, updateDoc, increment, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
+        const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
     authDomain: "yvypoty-491e8.firebaseapp.com",
     projectId: "yvypoty-491e8",
     storageBucket: "yvypoty-491e8.firebasestorage.app",
     messagingSenderId: "338156073833",
     appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
     measurementId: "G-W93E7TJ59V"};
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
 
-    const nick = localStorage.getItem("usuarioAtivo");
-    const meuSprite = localStorage.getItem("meuHeroi");
-    document.getElementById('p-sprite').innerText = meuSprite || '👤';
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    let playerLife = 100;
-    let enemyLife = 100;
-    let perguntas = [];
+        document.getElementById('btnEntrar').onclick = async () => {
+            const nick = document.getElementById('nome').value.trim();
+            const disciplina = document.getElementById('disciplina').value;
 
-    async function loadQuestions() {
-        const snap = await getDocs(collection(db, "perguntas"));
-        perguntas = snap.docs.map(d => d.data());
-        renderQuestion();
-    }
-
-    function renderQuestion() {
-        if (enemyLife <= 0) return finalizar(true);
-        if (perguntas.length === 0) {
-            document.getElementById('txt-pergunta').innerText = "Missão cumprida por enquanto!";
-            return;
-        }
-
-        const q = perguntas[Math.floor(Math.random() * perguntas.length)];
-        document.getElementById('txt-pergunta').innerText = q.enunciado;
-        const container = document.getElementById('btn-options');
-        container.innerHTML = "";
-
-        q.opcoes.forEach((opt, idx) => {
-            const btn = document.createElement('button');
-            btn.innerText = opt;
-            btn.onclick = () => check(idx, q.correta);
-            container.appendChild(btn);
-        });
-    }
-
-    async function check(choice, correct) {
-        const fb = document.getElementById('feedback-msg');
-        if (choice === correct) {
-            enemyLife -= 20;
-            fb.innerText = "Acerto Crítico!"; fb.style.color = "var(--secondary)";
-            // Sincroniza com a Dashboard do professor
-            await updateDoc(doc(db, "jogadores", nick), { acertos: increment(1) });
-        } else {
-            playerLife -= 25;
-            fb.innerText = "Você foi atingido!"; fb.style.color = "var(--danger)";
-        }
-
-        updateBars();
-        if (playerLife <= 0) return finalizar(false);
-        setTimeout(renderQuestion, 1000);
-    }
-
-    function updateBars() {
-        document.getElementById('player-hp').style.width = playerLife + "%";
-        document.getElementById('enemy-hp').style.width = enemyLife + "%";
-    }
-
-    function finalizar(win) {
-        document.getElementById('arena').innerHTML = win ? "<h1>🏆 VITÓRIA!</h1>" : "<h1>💀 DERROTA</h1>";
-    }
-
-    loadQuestions();
-</script>
+            if (nick && disciplina) {
+                // Salva na gaveta correta da disciplina
+                await setDoc(doc(db, "salas", disciplina, "jogadores", nick), { acertos: 0, status: "online", sprite: "⏳" });
+                
+                // Salva no celular para as próximas telas lembrarem
+                localStorage.setItem("usuarioAtivo", nick);
+                localStorage.setItem("disciplinaAtiva", disciplina);
+                
+                window.location.href = "selecao.html";
+            } else {
+                alert("Por favor, digite seu nome e escolha a disciplina!");
+            }
+        };
+    </script>
 </body>
 </html>
-
