@@ -7,8 +7,8 @@
     <style>
         body { background: #0f0f1a; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         .card { background: #1c1c2d; padding: 30px; border-radius: 20px; text-align: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #8e44ad; }
-        input { width: 90%; padding: 12px; margin: 15px 0; border-radius: 10px; border: none; background: #2a2a40; color: white; text-align: center; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: #8e44ad; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        input, select { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; background: #2a2a40; color: white; text-align: center; font-size: 16px; }
+        button { width: 100%; padding: 12px; margin-top: 15px; background: #8e44ad; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
         button:hover { background: #9b59b6; transform: scale(1.05); }
     </style>
 </head>
@@ -16,6 +16,18 @@
     <div class="card">
         <h2>⚔️ Entrar na Batalha</h2>
         <input type="text" id="nome" placeholder="Digite seu Nickname">
+        
+        <select id="disciplina">
+            <option value="" disabled selected>Escolha a Disciplina...</option>
+            <option value="matematica">Matemática</option>
+            <option value="portugues">Português</option>
+            <option value="biologia">Biologia</option>
+            <option value="historia">História</option>
+            <option value="geografia">Geografia</option>
+            <option value="fisica">Física</option>
+            <option value="quimica">Química</option>
+        </select>
+
         <button id="btnEntrar">AVANÇAR</button>
     </div>
 
@@ -36,15 +48,19 @@
 
         document.getElementById('btnEntrar').onclick = async () => {
             const nick = document.getElementById('nome').value.trim();
-            if (nick) {
-                // Registra o jogador no banco com 0 pontos e um ícone de "aguardando"
-                await setDoc(doc(db, "jogadores", nick), { acertos: 0, status: "online", sprite: "⏳" });
-                localStorage.setItem("usuarioAtivo", nick);
+            const disciplina = document.getElementById('disciplina').value;
+
+            if (nick && disciplina) {
+                // Salva na gaveta correta da disciplina
+                await setDoc(doc(db, "salas", disciplina, "jogadores", nick), { acertos: 0, status: "online", sprite: "⏳" });
                 
-                // MELHORIA: Envia para a seleção de heróis
+                // Salva no celular para as próximas telas lembrarem
+                localStorage.setItem("usuarioAtivo", nick);
+                localStorage.setItem("disciplinaAtiva", disciplina);
+                
                 window.location.href = "selecao.html";
             } else {
-                alert("Por favor, digite um nome!");
+                alert("Por favor, digite seu nome e escolha a disciplina!");
             }
         };
     </script>
