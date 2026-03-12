@@ -2,114 +2,102 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel de Batalha Real-Time</title>
+    <title>Dashboard do Professor</title>
     <style>
-        :root { --grama: #2e7d32; --pista: #455a64; --gold: #ffd700; }
+        :root { --gold: #ffd700; }
         body { margin: 0; background: #1a1a1a; color: white; font-family: sans-serif; overflow: hidden; }
         
-        header { background: rgba(0,0,0,0.8); padding: 10px; text-align: center; border-bottom: 3px solid var(--gold); }
+        /* TELA DE CONFIGURAÇÃO INICIAL */
+        #setup-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f3460; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .setup-box { background: #16213e; padding: 40px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 2px solid var(--gold); }
+        .setup-box select, .setup-box input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; font-size: 16px; border: none; }
+        .setup-box button { width: 100%; padding: 15px; background: var(--gold); color: black; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; margin-top: 15px;}
         
-        #arena { 
-            position: relative; 
-            width: 100vw; 
-            height: 75vh; 
-            background: linear-gradient(to bottom, #2c3e50, #000);
-            border-bottom: 10px solid var(--pista);
-            padding-top: 50px;
-        }
-
-        .player-container {
-            position: absolute;
-            left: 50px;
-            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
-        }
-
-        .avatar { font-size: 45px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)); }
+        header { background: rgba(0,0,0,0.8); padding: 10px; text-align: center; border-bottom: 3px solid var(--gold); position: relative; z-index: 100; }
         
-        .name-tag {
-            background: rgba(255,255,255,0.9);
-            color: black;
-            padding: 2px 8px;
-            border-radius: 5px;
-            font-size: 13px;
-            font-weight: bold;
-            margin-top: 5px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        /* A ARENA DINÂMICA */
+        #arena { position: relative; width: 100vw; height: 80vh; transition: 0.5s; overflow: hidden; }
+        
+        /* TEMA 1: CORRIDA CLÁSSICA */
+        .tema-corrida { background: linear-gradient(to bottom, #2c3e50, #111); border-bottom: 10px solid #455a64; }
+        .tema-corrida .finish-line { position: absolute; right: 10%; height: 100%; width: 30px; background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px); opacity: 0.5; border-left: 2px solid white; }
+        
+        /* TEMA 2: MUNDO PIXEL (Anos 90 Mario Style) */
+        .tema-pixel { 
+            background: #5c94fc; /* Céu azul do Mario */
+            border-bottom: 40px solid #c84c0c; /* Chão de tijolo */
         }
-
-        .score-bubble {
-            background: var(--gold);
-            color: #000;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            position: absolute;
-            top: -25px;
-            animation: pulse 1s infinite;
-            border: 2px solid black;
+        .tema-pixel::after {
+            content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 20px;
+            background: #00a800; /* Grama em cima do tijolo */
         }
+        .tema-pixel .finish-line { position: absolute; right: 10%; bottom: 10%; height: 60%; width: 60px; background: #f8d820; border: 4px solid #000; display: flex; align-items: flex-start; justify-content: center; font-size: 30px; border-radius: 10px 10px 0 0;}
+        .tema-pixel .finish-line::after { content: "👑"; margin-top: -25px; }
 
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        .player-container { position: absolute; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        .avatar { font-size: 50px; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.6)); }
+        
+        .name-tag { background: rgba(255,255,255,0.9); color: black; padding: 2px 8px; border-radius: 5px; font-size: 13px; font-weight: bold; margin-top: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .score-bubble { background: var(--gold); color: #000; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-weight: bold; position: absolute; top: -25px; border: 2px solid black; }
 
-        #finish-line {
-            position: absolute;
-            right: 120px;
-            height: 100%;
-            width: 30px;
-            background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px);
-            opacity: 0.4;
-            border-left: 2px solid white;
-        }
-
-        #podio { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; 
-            align-items: center; justify-content: center; color: var(--gold); 
-        }
-
-        #admin-menu {
-            position: fixed; bottom: 15px; right: 15px; opacity: 0.1; transition: 0.4s;
-            background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; display: flex; gap: 10px; z-index: 2000;
-        }
+        #podio { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: var(--gold); }
+        #admin-menu { position: fixed; bottom: 15px; right: 15px; opacity: 0.1; transition: 0.4s; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; display: flex; gap: 10px; z-index: 2000; }
         #admin-menu:hover { opacity: 1; }
         .admin-btn { cursor: pointer; padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; font-size: 12px; }
     </style>
 </head>
 <body>
 
+<div id="setup-overlay">
+    <div class="setup-box">
+        <h2 style="margin-top:0; color: white;">⚙️ Configurar Painel da Sala</h2>
+        
+        <label style="color:white; text-align:left; display:block;">Disciplina:</label>
+        <select id="select-disciplina">
+            <option value="matematica">Matemática</option>
+            <option value="portugues">Português</option>
+            <option value="biologia">Biologia</option>
+            <option value="historia">História</option>
+            <option value="geografia">Geografia</option>
+            <option value="fisica">Física</option>
+            <option value="quimica">Química</option>
+        </select>
+
+        <label style="color:white; text-align:left; display:block;">Cenário da Batalha:</label>
+        <select id="select-tema">
+            <option value="tema-pixel">Castelo Retrô (Anos 90 - Pódio Animado)</option>
+            <option value="tema-corrida">Arena de Corrida Clássica</option>
+        </select>
+        
+        <button onclick="iniciarDashboard()">INICIAR PROJEÇÃO</button>
+    </div>
+</div>
+
 <div id="podio">
     <h1 style="font-size: 120px; margin: 0;">🏆</h1>
     <h1 id="vencedor-nome" style="font-size: 60px; text-transform: uppercase;">NOME</h1>
-    <h2 style="color: white;">CONQUISTOU A VITÓRIA SUPREMA!</h2>
-    <button onclick="location.reload()" style="margin-top:30px; padding: 15px 40px; font-size: 20px; cursor: pointer; border-radius: 50px; border: none; background: var(--gold); color: black; font-weight: bold;">REINICIAR BATALHA</button>
+    <h2 style="color: white;">CRUZOU A LINHA DE CHEGADA!</h2>
+    <button onclick="location.reload()" style="margin-top:30px; padding: 15px 40px; font-size: 20px; cursor: pointer; border-radius: 50px; border: none; background: var(--gold); color: black; font-weight: bold;">NOVA RODADA</button>
 </div>
 
 <header>
-    <h1>🏆 GRANDE BATALHA DO CONHECIMENTO 🏆</h1>
-    <p>Guerreiros na Arena: <span id="count" style="color:var(--gold); font-size: 1.2em;">0</span> | Alvo: 10 Pontos</p>
+    <h1>🏆 GRANDE BATALHA: <span id="titulo-sala" style="color:var(--gold);">---</span> 🏆</h1>
+    <p>Guerreiros na Arena: <span id="count" style="color:var(--gold); font-size: 1.2em;">0</span> | Linha de Chegada: 10 Casas</p>
 </header>
 
 <div id="arena">
-    <div id="finish-line"></div>
+    <div class="finish-line"></div>
 </div>
 
 <div id="admin-menu">
     <button class="admin-btn" onclick="window.location.href='index.html'" style="background: #3498db; color: white;">Página de Login</button>
     <button class="admin-btn" onclick="window.location.href='admin.html'" style="background: #8e44ad; color: white;">Cadastrar Perguntas</button>
-    <button class="admin-btn" onclick="resetarTudo()" style="background: #e74c3c; color: white;">LIMPAR ARENA (RESET)</button>
+    <button class="admin-btn" onclick="resetarTudo()" style="background: #e74c3c; color: white;">LIMPAR ARENA DESTA SALA</button>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, getDocs, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
     authDomain: "yvypoty-491e8.firebaseapp.com",
@@ -118,78 +106,99 @@
     messagingSenderId: "338156073833",
     appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
     measurementId: "G-W93E7TJ59V"};
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    
     const arena = document.getElementById('arena');
     const players = {};
+    let salaAtual = "";
+    let temaAtual = "";
 
-    // MELHORIA: A função agora recebe o objeto 'dados' inteiro para ler o Sprite e os Acertos
+    // META DEFINIDA
+    const META_PONTOS = 10; 
+
+    window.iniciarDashboard = () => {
+        salaAtual = document.getElementById('select-disciplina').value;
+        temaAtual = document.getElementById('select-tema').value;
+        const nomeDisplay = document.getElementById('select-disciplina').options[document.getElementById('select-disciplina').selectedIndex].text;
+        
+        document.getElementById('titulo-sala').innerText = nomeDisplay.toUpperCase();
+        arena.className = temaAtual; // Aplica o tema visual escolhido
+        
+        document.getElementById('setup-overlay').style.display = "none";
+        iniciarEscuta();
+    }
+
     function atualizarOuCriarJogador(nome, dados) {
         let acertos = dados.acertos || 0;
-        let icone = dados.sprite || "⏳"; // Mostra ampulheta se ele ainda estiver escolhendo
+        let icone = dados.sprite || "⏳";
 
         if (!players[nome]) {
             const container = document.createElement('div');
             container.id = `p-${nome}`;
             container.className = 'player-container';
-            container.style.top = (Math.random() * 65 + 10) + "%";
+            
+            // Define posição inicial fixa no começo
+            container.style.left = "2%";
+            container.style.bottom = "10%"; // Começa no chão
             
             container.innerHTML = `
                 <div class="score-bubble" id="score-${nome}">0</div>
                 <div class="avatar" id="avatar-${nome}">${icone}</div>
                 <div class="name-tag">${nome}</div>
             `;
-            
             arena.appendChild(container);
             players[nome] = true;
             document.getElementById('count').innerText = Object.keys(players).length;
         } else {
-            // Atualiza o desenho se ele escolheu o herói depois de entrar
             document.getElementById(`avatar-${nome}`).innerText = icone;
         }
 
         const pElement = document.getElementById(`p-${nome}`);
         const sElement = document.getElementById(`score-${nome}`);
-        
-        // MELHORIA: Move o boneco baseado na quantidade de acertos
-        const novaPosicao = 50 + (acertos * (window.innerWidth / 12.5)); 
-        pElement.style.left = novaPosicao + "px";
         sElement.innerText = acertos;
+        
+        // CALCULO DE MOVIMENTO DINÂMICO
+        // Largura: avança 8% da tela a cada acerto para chegar perto dos 90% (Linha de chegada)
+        let eixoX = 2 + (acertos * 8.5); 
+        pElement.style.left = `${eixoX}%`;
 
-        // Pula apenas quando o aluno pontua
-        if(acertos > 0) {
-            pElement.style.marginTop = "-25px";
-            setTimeout(() => pElement.style.marginTop = "0px", 250);
+        // Se for o Tema Pixel (Retrô), eles sobem como se estivessem escalando uma montanha/pódio
+        if (temaAtual === 'tema-pixel') {
+            let eixoY = 10 + (acertos * 4); // Sobe 4% a cada acerto
+            pElement.style.bottom = `${eixoY}%`;
+            pElement.style.top = "auto"; 
+        } else {
+            // Se for corrida clássica, espalha eles nas raias (altura aleatória gerada baseada no nome)
+            let hash = nome.length * 5; 
+            pElement.style.top = `${20 + (hash % 50)}%`; 
         }
 
-        if (acertos >= 10) {
+        // Condição de Vitória exata na Linha de Chegada
+        if (acertos >= META_PONTOS) {
             document.getElementById('vencedor-nome').innerText = nome;
             document.getElementById('podio').style.display = 'flex';
         }
     }
 
-    onSnapshot(collection(db, "jogadores"), (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-            const dados = change.doc.data();
-            const nome = change.doc.id;
-            atualizarOuCriarJogador(nome, dados);
+    function iniciarEscuta() {
+        onSnapshot(collection(db, "salas", salaAtual, "jogadores"), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const dados = change.doc.data();
+                const nome = change.doc.id;
+                atualizarOuCriarJogador(nome, dados);
+            });
         });
-    });
+    }
 
     window.resetarTudo = async () => {
-        if(confirm("ATENÇÃO: Isso vai expulsar todos da arena, zerar os personagens ocupados e zerar o placar. Continuar?")) {
-            // Limpa jogadores
-            const queryJogadores = await getDocs(collection(db, "jogadores"));
-            const promessasJogadores = queryJogadores.docs.map(d => deleteDoc(doc(db, "jogadores", d.id)));
+        if(confirm(`Isso vai limpar os jogadores e heróis da disciplina de ${salaAtual.toUpperCase()}. Continuar?`)) {
+            const queryJogadores = await getDocs(collection(db, "salas", salaAtual, "jogadores"));
+            const promessasJogadores = queryJogadores.docs.map(d => deleteDoc(doc(db, "salas", salaAtual, "jogadores", d.id)));
             await Promise.all(promessasJogadores);
             
-            // Limpa os personagens ocupados
-            await updateDoc(doc(db, "configuracao", "personagens"), {
-                mago: "", elfo: "", guerreiro: "", ninja: "", robo: "", vampiro: ""
-            });
-
-            alert("Arena completamente limpa!");
+            await setDoc(doc(db, "salas", salaAtual, "configuracao", "personagens"), {});
+            alert("Arena limpa com sucesso!");
             location.reload();
         }
     }
