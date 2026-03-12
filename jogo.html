@@ -3,66 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Arena RPG</title>
+    <title>RPG de Conhecimento - Batalha</title>
     <style>
-        body { background: #0f0f1a; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #1c1c2d; padding: 30px; border-radius: 20px; text-align: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #8e44ad; }
-        input, select { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; background: #2a2a40; color: white; text-align: center; font-size: 16px; }
-        button { width: 100%; padding: 12px; margin-top: 15px; background: #8e44ad; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        button:hover { background: #9b59b6; transform: scale(1.05); }
+        :root { --primary: #6200ea; --secondary: #03dac6; --danger: #cf6679; --bg: #121212; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        
+        #arena { width: 90%; max-width: 500px; background: #1e1e1e; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 2px solid #333; position: relative; }
+        
+        /* Personagem no Canto */
+        #player-corner { position: absolute; top: -25px; left: -10px; font-size: 60px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); animation: float 3s infinite ease-in-out; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        #pontuacao-display { position: absolute; top: 10px; right: 20px; font-weight: bold; color: var(--secondary); font-size: 18px; }
+
+        #question-box { background: #2c2c2c; padding: 20px; border-radius: 10px; margin-top: 30px; margin-bottom: 20px; min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { padding: 15px; border: none; border-radius: 8px; background: #3d3d3d; color: white; cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 14px; }
+        button:hover { background: var(--primary); transform: translateY(-2px); }
+        .feedback { margin-top: 15px; font-weight: bold; font-size: 18px; height: 25px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>⚔️ Entrar na Batalha</h2>
-        <input type="text" id="nome" placeholder="Digite seu Nickname">
-        
-        <select id="disciplina">
-            <option value="" disabled selected>Escolha a Disciplina...</option>
-            <option value="matematica">Matemática</option>
-            <option value="portugues">Português</option>
-            <option value="biologia">Biologia</option>
-            <option value="historia">História</option>
-            <option value="geografia">Geografia</option>
-            <option value="fisica">Física</option>
-            <option value="quimica">Química</option>
-        </select>
 
-        <button id="btnEntrar">AVANÇAR</button>
-    </div>
+<div id="arena">
+    <div id="player-corner">👤</div>
+    <div id="pontuacao-display">Casas Avançadas: <span id="pontos-ui">0</span></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <div id="question-box"><p id="txt-pergunta">Buscando pergaminhos da disciplina...</p></div>
+    <div class="options" id="btn-options"></div>
+    <p class="feedback" id="feedback-msg"></p>
+</div>
 
-        const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, updateDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
     authDomain: "yvypoty-491e8.firebaseapp.com",
     projectId: "yvypoty-491e8",
     storageBucket: "yvypoty-491e8.firebasestorage.app",
     messagingSenderId: "338156073833",
     appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
     measurementId: "G-W93E7TJ59V"};
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    // PUXANDO AS INFORMAÇÕES DO CELULAR DO ALUNO
+    const nick = localStorage.getItem("usuarioAtivo");
+    const disciplina = localStorage.getItem("disciplinaAtiva");
+    const meuSprite = localStorage.getItem("meuHeroi");
+    
+    // TRAVA ANTI-LOOP (Se faltar algo, ele avisa antes de voltar)
+    if (!nick || !disciplina || !meuSprite) {
+        alert("⚠️ ATENÇÃO: Seus dados de login sumiram do celular! Voltando para o início.");
+        window.location.href = "index.html";
+        throw new Error("Parando execução por falta de dados.");
+    }
 
-        document.getElementById('btnEntrar').onclick = async () => {
-            const nick = document.getElementById('nome').value.trim();
-            const disciplina = document.getElementById('disciplina').value;
+    // Se passou da trava, o jogo continua normalmente:
+    document.getElementById('player-corner').innerText = meuSprite;
 
-            if (nick && disciplina) {
-                // Salva na gaveta correta da disciplina
-                await setDoc(doc(db, "salas", disciplina, "jogadores", nick), { acertos: 0, status: "online", sprite: "⏳" });
-                
-                // Salva no celular para as próximas telas lembrarem
-                localStorage.setItem("usuarioAtivo", nick);
-                localStorage.setItem("disciplinaAtiva", disciplina);
-                
-                window.location.href = "selecao.html";
-            } else {
-                alert("Por favor, digite seu nome e escolha a disciplina!");
+    let perguntas = [];
+    let pontosAtuais = 0;
+
+    async function loadQuestions() {
+        try {
+            const snap = await getDocs(collection(db, "salas", disciplina, "perguntas"));
+            perguntas = snap.docs.map(d => d.data());
+            renderQuestion();
+        } catch (erro) {
+            alert("Erro ao buscar as perguntas: " + erro);
+        }
+    }
+
+    function renderQuestion() {
+        if (perguntas.length === 0) {
+            document.getElementById('txt-pergunta').innerText = "Você respondeu todas as missões disponíveis!";
+            document.getElementById('btn-options').innerHTML = "";
+            return;
+        }
+
+        const q = perguntas[Math.floor(Math.random() * perguntas.length)];
+        document.getElementById('txt-pergunta').innerText = q.enunciado;
+        const container = document.getElementById('btn-options');
+        container.innerHTML = "";
+
+        q.opcoes.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.innerText = opt;
+            btn.onclick = () => check(idx, q.correta);
+            container.appendChild(btn);
+        });
+    }
+
+    async function check(choice, correct) {
+        const fb = document.getElementById('feedback-msg');
+        const refJogador = doc(db, "salas", disciplina, "jogadores", nick);
+        
+        try {
+            const docSnap = await getDoc(refJogador);
+            if (docSnap.exists()) {
+                pontosAtuais = docSnap.data().acertos || 0;
             }
-        };
-    </script>
+
+            if (choice === correct) {
+                pontosAtuais += 1;
+                fb.innerText = "✨ Resposta Certa! Avançou 1 casa!"; 
+                fb.style.color = "var(--secondary)";
+            } else {
+                pontosAtuais = Math.max(0, pontosAtuais - 1);
+                fb.innerText = "❌ Resposta Errada! Voltou 1 casa!"; 
+                fb.style.color = "var(--danger)";
+            }
+
+            document.getElementById('pontos-ui').innerText = pontosAtuais;
+            await updateDoc(refJogador, { acertos: pontosAtuais });
+
+            document.getElementById('btn-options').innerHTML = ""; 
+            setTimeout(() => {
+                fb.innerText = "";
+                renderQuestion();
+            }, 2000);
+
+        } catch (erro) {
+            console.error("Erro ao verificar resposta:", erro);
+        }
+    }
+
+    loadQuestions();
+</script>
 </body>
 </html>
