@@ -3,40 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPG de Conhecimento - Batalha</title>
+    <title>RPG - Respondendo</title>
     <style>
         :root { --primary: #6200ea; --secondary: #03dac6; --danger: #cf6679; --bg: #121212; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        body { background: var(--bg); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
         
-        #arena { width: 90%; max-width: 500px; background: #1e1e1e; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 2px solid #333; position: relative; }
+        #arena { width: 90%; max-width: 500px; background: #1e1e1e; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; border: 2px solid #333;}
         
-        /* Personagem no Canto */
-        #player-corner { position: absolute; top: -25px; left: -10px; font-size: 60px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); animation: float 3s infinite ease-in-out; }
+        #player-corner { position: absolute; top: -30px; left: -10px; font-size: 60px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); animation: float 3s infinite ease-in-out; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         
-        #pontuacao-display { position: absolute; top: 10px; right: 20px; font-weight: bold; color: var(--secondary); font-size: 18px; }
+        #status-bar { color: var(--gold); font-weight: bold; margin-bottom: 10px; font-size: 20px;}
+        
+        /* TELA DE AGUARDE (SEMÁFORO) */
+        #tela-bloqueio { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; }
+        .loader { border: 5px solid #333; border-top: 5px solid #8e44ad; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #question-box { background: #2c2c2c; padding: 20px; border-radius: 10px; margin-top: 30px; margin-bottom: 20px; min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        /* TELA DE JOGO */
+        #tela-quiz { display: none; }
+        #question-box { background: #2c2c2c; padding: 20px; border-radius: 10px; margin-bottom: 20px; font-size: 18px; }
         .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { padding: 15px; border: none; border-radius: 8px; background: #3d3d3d; color: white; cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 14px; }
-        button:hover { background: var(--primary); transform: translateY(-2px); }
-        .feedback { margin-top: 15px; font-weight: bold; font-size: 18px; height: 25px; }
+        button { padding: 15px; border: none; border-radius: 8px; background: #3d3d3d; color: white; cursor: pointer; font-weight: bold; }
+        button:hover { background: var(--primary); }
     </style>
 </head>
 <body>
 
 <div id="arena">
     <div id="player-corner">👤</div>
-    <div id="pontuacao-display">Casas Avançadas: <span id="pontos-ui">0</span></div>
+    <div id="status-bar">Casas Avançadas: <span id="pontos-ui">0</span></div>
 
-    <div id="question-box"><p id="txt-pergunta">Buscando pergaminhos da disciplina...</p></div>
-    <div class="options" id="btn-options"></div>
-    <p class="feedback" id="feedback-msg"></p>
+    <div id="tela-bloqueio">
+        <div class="loader"></div>
+        <h2 style="color:#f39c12;">Aguarde o professor dar o PLAY para a batalha iniciar!</h2>
+    </div>
+
+    <div id="tela-quiz">
+        <div id="question-box"><p id="txt-pergunta">Carregando...</p></div>
+        <div class="options" id="btn-options"></div>
+        <p id="feedback-msg" style="font-weight:bold; height: 20px;"></p>
+    </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, updateDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, updateDoc, getDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
     authDomain: "yvypoty-491e8.firebaseapp.com",
@@ -45,93 +57,76 @@
     messagingSenderId: "338156073833",
     appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
     measurementId: "G-W93E7TJ59V"};
-    
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // PUXANDO AS INFORMAÇÕES DO CELULAR DO ALUNO
     const nick = localStorage.getItem("usuarioAtivo");
     const disciplina = localStorage.getItem("disciplinaAtiva");
     const meuSprite = localStorage.getItem("meuHeroi");
     
-    // TRAVA ANTI-LOOP (Se faltar algo, ele avisa antes de voltar)
-    if (!nick || !disciplina || !meuSprite) {
-        alert("⚠️ ATENÇÃO: Seus dados de login sumiram do celular! Voltando para o início.");
-        window.location.href = "index.html";
-        throw new Error("Parando execução por falta de dados.");
-    }
+    if (!nick || !disciplina) { window.location.href = "index.html"; }
 
-    // Se passou da trava, o jogo continua normalmente:
     document.getElementById('player-corner').innerText = meuSprite;
-
     let perguntas = [];
     let pontosAtuais = 0;
 
-    async function loadQuestions() {
-        try {
-            const snap = await getDocs(collection(db, "salas", disciplina, "perguntas"));
-            perguntas = snap.docs.map(d => d.data());
-            renderQuestion();
-        } catch (erro) {
-            alert("Erro ao buscar as perguntas: " + erro);
+    // 1. ESCUTA O SEMÁFORO DO PROFESSOR (PLAY/PAUSE)
+    onSnapshot(doc(db, "salas", disciplina, "configuracao", "estado"), (docSnap) => {
+        const dados = docSnap.data();
+        if (dados && dados.jogando === true) {
+            // VERDE! Mostra perguntas
+            document.getElementById('tela-bloqueio').style.display = 'none';
+            document.getElementById('tela-quiz').style.display = 'block';
+            if(perguntas.length === 0) loadQuestions();
+        } else {
+            // VERMELHO! Esconde perguntas
+            document.getElementById('tela-bloqueio').style.display = 'flex';
+            document.getElementById('tela-quiz').style.display = 'none';
         }
+    });
+
+    // 2. BUSCA AS PERGUNTAS E RENDERIZA
+    async function loadQuestions() {
+        const snap = await getDocs(collection(db, "salas", disciplina, "perguntas"));
+        perguntas = snap.docs.map(d => d.data());
+        renderQuestion();
     }
 
     function renderQuestion() {
-        if (perguntas.length === 0) {
-            document.getElementById('txt-pergunta').innerText = "Você respondeu todas as missões disponíveis!";
-            document.getElementById('btn-options').innerHTML = "";
-            return;
-        }
-
+        if (perguntas.length === 0) { document.getElementById('txt-pergunta').innerText = "Sem missões no momento."; return; }
         const q = perguntas[Math.floor(Math.random() * perguntas.length)];
         document.getElementById('txt-pergunta').innerText = q.enunciado;
         const container = document.getElementById('btn-options');
         container.innerHTML = "";
-
         q.opcoes.forEach((opt, idx) => {
-            const btn = document.createElement('button');
-            btn.innerText = opt;
+            const btn = document.createElement('button'); btn.innerText = opt;
             btn.onclick = () => check(idx, q.correta);
             container.appendChild(btn);
         });
     }
 
+    // 3. A LÓGICA DE GANHAR OU PERDER CASAS
     async function check(choice, correct) {
         const fb = document.getElementById('feedback-msg');
         const refJogador = doc(db, "salas", disciplina, "jogadores", nick);
         
-        try {
-            const docSnap = await getDoc(refJogador);
-            if (docSnap.exists()) {
-                pontosAtuais = docSnap.data().acertos || 0;
-            }
+        const docSnap = await getDoc(refJogador);
+        pontosAtuais = docSnap.exists() ? (docSnap.data().acertos || 0) : 0;
 
-            if (choice === correct) {
-                pontosAtuais += 1;
-                fb.innerText = "✨ Resposta Certa! Avançou 1 casa!"; 
-                fb.style.color = "var(--secondary)";
-            } else {
-                pontosAtuais = Math.max(0, pontosAtuais - 1);
-                fb.innerText = "❌ Resposta Errada! Voltou 1 casa!"; 
-                fb.style.color = "var(--danger)";
-            }
-
-            document.getElementById('pontos-ui').innerText = pontosAtuais;
-            await updateDoc(refJogador, { acertos: pontosAtuais });
-
-            document.getElementById('btn-options').innerHTML = ""; 
-            setTimeout(() => {
-                fb.innerText = "";
-                renderQuestion();
-            }, 2000);
-
-        } catch (erro) {
-            console.error("Erro ao verificar resposta:", erro);
+        if (choice === correct) {
+            pontosAtuais += 1;
+            fb.innerText = "✨ Certo! Avançou 1 casa!"; fb.style.color = "#03dac6";
+        } else {
+            pontosAtuais = Math.max(0, pontosAtuais - 1);
+            fb.innerText = "❌ Errou! Voltou 1 casa!"; fb.style.color = "#cf6679";
         }
-    }
 
-    loadQuestions();
+        document.getElementById('pontos-ui').innerText = pontosAtuais;
+        await updateDoc(refJogador, { acertos: pontosAtuais });
+
+        document.getElementById('btn-options').innerHTML = ""; // Esconde para não clicar 2x
+        setTimeout(() => { fb.innerText = ""; renderQuestion(); }, 2000);
+    }
 </script>
 </body>
 </html>
