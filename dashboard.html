@@ -2,157 +2,51 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard do Professor</title>
+    <title>Projetor - Arena</title>
     <style>
         :root { --gold: #ffd700; }
         body { margin: 0; background: #1a1a1a; color: white; font-family: sans-serif; overflow: hidden; }
-        
-        /* TELA DE CONFIGURAÇÃO INICIAL */
-        #setup-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f3460; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .setup-box { background: #16213e; padding: 40px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 2px solid var(--gold); max-width: 500px; width: 90%; }
-        .setup-box select, .setup-box input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; font-size: 16px; border: none; box-sizing: border-box; }
-        .setup-box button { width: 100%; padding: 15px; background: var(--gold); color: black; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; margin-top: 15px; transition: 0.3s;}
-        .setup-box button:hover { transform: scale(1.05); }
-        
         header { background: rgba(0,0,0,0.8); padding: 10px; text-align: center; border-bottom: 3px solid var(--gold); position: relative; z-index: 100; }
+        #arena { position: relative; width: 100vw; height: 85vh; transition: background 1s ease-in-out; overflow: hidden; background-size: cover; background-position: center; }
         
-        /* A ARENA DINÂMICA */
-        #arena { position: relative; width: 100vw; height: 80vh; transition: background 1s ease-in-out; overflow: hidden; background-size: cover; background-position: center; }
-        
-        /* =========================================
-           TEMAS VISUAIS (MUNDOS)
-           Dica: Você pode trocar o 'background' por um url('link-da-imagem.gif') no futuro!
-           ========================================= */
-        
-        /* 1. Corrida Clássica (Horizontal) */
+        /* TEMAS BÁSICOS (Mantenha os outros aqui se quiser) */
         .tema-corrida { background: linear-gradient(to bottom, #2c3e50, #111); border-bottom: 10px solid #455a64; }
         .tema-corrida .finish-line { position: absolute; right: 10%; height: 100%; width: 30px; background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px); opacity: 0.5; border-left: 2px solid white; }
         
-        /* Base para a linha de chegada de todos os temas Pixel (Vertical) */
         .linha-pixel { position: absolute; right: 10%; bottom: 10%; height: 60%; width: 60px; border: 4px solid #000; display: flex; align-items: flex-start; justify-content: center; font-size: 30px; border-radius: 10px 10px 0 0; }
         .linha-pixel::after { content: "👑"; margin-top: -25px; filter: drop-shadow(0 0 10px gold); }
-
-        /* 2. Mario 90s */
         .tema-pixel { background: #5c94fc; border-bottom: 40px solid #c84c0c; }
         .tema-pixel::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; background: #00a800; }
         .tema-pixel .finish-line { @extend .linha-pixel; background: #f8d820; right: 10%; bottom: 10%; height: 60%; width: 60px; position: absolute; border: 4px solid #000; border-radius: 10px 10px 0 0; display: flex; justify-content: center; }
         .tema-pixel .finish-line::after { content: "👑"; margin-top: -25px; }
 
-        /* 3. Era do Gelo */
-        .tema-gelo { background: linear-gradient(to bottom, #a1c4fd, #c2e9fb); border-bottom: 40px solid #ffffff; }
-        .tema-gelo::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; background: #e0f7fa; border-top: 5px solid #b2ebf2; }
-        .tema-gelo .finish-line { @extend .linha-pixel; background: #81d4fa; right: 10%; bottom: 10%; height: 60%; width: 60px; position: absolute; border: 4px solid #0288d1; border-radius: 10px 10px 0 0; display: flex; justify-content: center; }
-        .tema-gelo .finish-line::after { content: "❄️"; margin-top: -25px; font-size: 40px;}
-
-        /* 4. Castelos e Dragões */
-        .tema-dragao { background: linear-gradient(to bottom, #2b1055, #7597de); border-bottom: 40px solid #2c3e50; }
-        .tema-dragao::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 15px; background: #e74c3c; box-shadow: 0 -10px 20px #e74c3c; /* Lava */ }
-        .tema-dragao .finish-line { background: #34495e; right: 10%; bottom: 10%; height: 60%; width: 60px; position: absolute; border: 4px solid #1abc9c; border-radius: 10px 10px 0 0; display: flex; justify-content: center; }
-        .tema-dragao .finish-line::after { content: "🐉"; margin-top: -35px; font-size: 45px;}
-
-        /* 5. Cidade Medieval */
-        .tema-medieval { background: linear-gradient(to bottom, #4ca1af, #c4e0e5); border-bottom: 40px solid #5d4037; }
-        .tema-medieval::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; background: #795548; border-top: 5px dashed #3e2723; }
-        .tema-medieval .finish-line { background: #8d6e63; right: 10%; bottom: 10%; height: 60%; width: 60px; position: absolute; border: 4px solid #3e2723; border-radius: 10px 10px 0 0; display: flex; justify-content: center; }
-        .tema-medieval .finish-line::after { content: "🏰"; margin-top: -30px; font-size: 40px;}
-
-        /* 6. Ficção Científica (Cyberpunk) */
-        .tema-scifi { background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e); border-bottom: 40px solid #000000; }
-        .tema-scifi::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: #00ffff; box-shadow: 0 0 15px #00ffff; }
-        .tema-scifi .finish-line { background: #1a1a2e; right: 10%; bottom: 10%; height: 60%; width: 60px; position: absolute; border: 4px solid #ff00ff; border-radius: 10px 10px 0 0; display: flex; justify-content: center; box-shadow: 0 0 20px #ff00ff; }
-        .tema-scifi .finish-line::after { content: "🛸"; margin-top: -35px; font-size: 40px;}
-
-        /* 7. Incas / Maias */
-        .tema-inca { background: linear-gradient(to bottom, #11998e, #38ef7d); border-bottom: 40px solid #8d6e63; }
-        .tema-inca::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; background: #2e7d32; border-top: 5px solid #1b5e20; }
-        .tema-inca .finish-line { background: #fbc02d; right: 10%; bottom: 10%; height: 60%; width: 60px; position: absolute; border: 4px solid #f57f17; border-radius: 0; display: flex; justify-content: center; clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%); }
-        .tema-inca .finish-line::after { content: "🛕"; margin-top: -35px; font-size: 40px;}
-
-        /* 8. Dinossauros */
-        .tema-dino { background: linear-gradient(to bottom, #ff7e5f, #feb47b); border-bottom: 40px solid #3e2723; }
-        .tema-dino::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 25px; background: #1b5e20; }
-        .tema-dino .finish-line { background: #795548; right: 10%; bottom: 10%; height: 60%; width: 60px; position: absolute; border: 4px solid #3e2723; border-radius: 10px 10px 0 0; display: flex; justify-content: center; }
-        .tema-dino .finish-line::after { content: "🦖"; margin-top: -35px; font-size: 45px;}
-
-        /* 9. Mundo Lego (Blocos) */
-        .tema-lego { background: #4fc3f7; border-bottom: 40px solid #e53935; }
-        .tema-lego::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; background: repeating-linear-gradient(90deg, #fdd835, #fdd835 20px, #1e88e5 20px, #1e88e5 40px, #43a047 40px, #43a047 60px); }
-        .tema-lego .finish-line { background: #fdd835; right: 10%; bottom: 10%; height: 60%; width: 60px; position: absolute; border: 4px dashed #d32f2f; border-radius: 0; display: flex; justify-content: center; }
-        .tema-lego .finish-line::after { content: "🧱"; margin-top: -30px; font-size: 40px;}
-
-        /* ========================================= */
-
         .player-container { position: absolute; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; align-items: center; z-index: 10; }
         .avatar { font-size: 50px; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.6)); }
-        
-        .name-tag { background: rgba(255,255,255,0.9); color: black; padding: 2px 8px; border-radius: 5px; font-size: 13px; font-weight: bold; margin-top: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .name-tag { background: rgba(255,255,255,0.9); color: black; padding: 2px 8px; border-radius: 5px; font-size: 13px; font-weight: bold; margin-top: 5px; }
         .score-bubble { background: var(--gold); color: #000; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-weight: bold; position: absolute; top: -25px; border: 2px solid black; }
 
         #podio { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: var(--gold); }
-        #admin-menu { position: fixed; bottom: 15px; right: 15px; opacity: 0.1; transition: 0.4s; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px; display: flex; gap: 10px; z-index: 2000; }
-        #admin-menu:hover { opacity: 1; }
-        .admin-btn { cursor: pointer; padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div id="setup-overlay">
-    <div class="setup-box">
-        <h2 style="margin-top:0; color: white;">⚙️ Configurar Painel da Sala</h2>
-        
-        <label style="color:white; text-align:left; display:block;">Sua Disciplina:</label>
-        <select id="select-disciplina">
-            <option value="matematica">Matemática</option>
-            <option value="portugues">Português</option>
-            <option value="biologia">Biologia</option>
-            <option value="historia">História</option>
-            <option value="geografia">Geografia</option>
-            <option value="fisica">Física</option>
-            <option value="quimica">Química</option>
-        </select>
-
-        <label style="color:white; text-align:left; display:block; margin-top: 15px;">Escolha o Cenário da Batalha:</label>
-        <select id="select-tema">
-            <option value="tema-pixel">🍄 Castelo Retrô (Anos 90)</option>
-            <option value="tema-gelo">🧊 Era do Gelo</option>
-            <option value="tema-dragao">🐉 Castelos e Dragões</option>
-            <option value="tema-medieval">🏰 Cidade Medieval</option>
-            <option value="tema-scifi">🚀 Ficção Científica (Neon)</option>
-            <option value="tema-inca">🛕 Templos Incas/Maias</option>
-            <option value="tema-dino">🦖 Mundo dos Dinossauros</option>
-            <option value="tema-lego">🧱 Mundo de Blocos (Lego)</option>
-            <option value="tema-corrida">🏃‍♂️ Arena de Corrida Clássica (Plana)</option>
-        </select>
-        
-        <button onclick="iniciarDashboard()">INICIAR PROJEÇÃO</button>
-    </div>
-</div>
-
 <div id="podio">
     <h1 style="font-size: 120px; margin: 0;">🏆</h1>
-    <h1 id="vencedor-nome" style="font-size: 60px; text-transform: uppercase;">NOME</h1>
+    <h1 id="vencedor-nome" style="font-size: 60px;">NOME</h1>
     <h2 style="color: white;">CRUZOU A LINHA DE CHEGADA!</h2>
-    <button onclick="location.reload()" style="margin-top:30px; padding: 15px 40px; font-size: 20px; cursor: pointer; border-radius: 50px; border: none; background: var(--gold); color: black; font-weight: bold;">NOVA RODADA</button>
 </div>
 
 <header>
-    <h1>🏆 GRANDE BATALHA: <span id="titulo-sala" style="color:var(--gold);">---</span> 🏆</h1>
-    <p>Guerreiros na Arena: <span id="count" style="color:var(--gold); font-size: 1.2em;">0</span> | Linha de Chegada: 10 Casas</p>
+    <h1>🏆 BATALHA DE <span id="titulo-sala" style="color:var(--gold);"></span> 🏆</h1>
 </header>
 
 <div id="arena">
     <div class="finish-line"></div>
 </div>
 
-<div id="admin-menu">
-    <button class="admin-btn" onclick="window.location.href='index.html'" style="background: #3498db; color: white;">Página de Login</button>
-    <button class="admin-btn" onclick="window.location.href='admin.html'" style="background: #8e44ad; color: white;">Cadastrar Perguntas</button>
-    <button class="admin-btn" onclick="resetarTudo()" style="background: #e74c3c; color: white;">LIMPAR ARENA DESTA SALA</button>
-</div>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, getDocs, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
     authDomain: "yvypoty-491e8.firebaseapp.com",
@@ -164,94 +58,55 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
-    const arena = document.getElementById('arena');
-    const players = {};
-    let salaAtual = "";
-    let temaAtual = "";
+    // Lê as escolhas que o professor fez no admin.html
+    const disciplina = localStorage.getItem("disciplinaAtiva");
+    const tema = localStorage.getItem("temaAtivo") || "tema-corrida";
+    
+    if(!disciplina) { alert("Erro: Disciplina não definida!"); }
 
+    document.getElementById('titulo-sala').innerText = disciplina.toUpperCase();
+    document.getElementById('arena').className = tema; 
+
+    const players = {};
     const META_PONTOS = 10; 
 
-    window.iniciarDashboard = () => {
-        salaAtual = document.getElementById('select-disciplina').value;
-        temaAtual = document.getElementById('select-tema').value;
-        const nomeDisplay = document.getElementById('select-disciplina').options[document.getElementById('select-disciplina').selectedIndex].text;
-        
-        document.getElementById('titulo-sala').innerText = nomeDisplay.toUpperCase();
-        arena.className = temaAtual; 
-        
-        document.getElementById('setup-overlay').style.display = "none";
-        iniciarEscuta();
-    }
+    onSnapshot(collection(db, "salas", disciplina, "jogadores"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            const dados = change.doc.data();
+            const nome = change.doc.id;
+            let acertos = dados.acertos || 0;
+            let icone = dados.sprite || "⏳";
 
-    function atualizarOuCriarJogador(nome, dados) {
-        let acertos = dados.acertos || 0;
-        let icone = dados.sprite || "⏳";
+            if (!players[nome]) {
+                const container = document.createElement('div');
+                container.id = `p-${nome}`;
+                container.className = 'player-container';
+                container.innerHTML = `<div class="score-bubble" id="score-${nome}">0</div><div class="avatar" id="avatar-${nome}">${icone}</div><div class="name-tag">${nome}</div>`;
+                document.getElementById('arena').appendChild(container);
+                players[nome] = true;
+            } else {
+                document.getElementById(`avatar-${nome}`).innerText = icone;
+            }
 
-        if (!players[nome]) {
-            const container = document.createElement('div');
-            container.id = `p-${nome}`;
-            container.className = 'player-container';
+            const pElement = document.getElementById(`p-${nome}`);
+            document.getElementById(`score-${nome}`).innerText = acertos;
             
-            container.style.left = "2%";
-            container.style.bottom = "10%"; 
-            
-            container.innerHTML = `
-                <div class="score-bubble" id="score-${nome}">0</div>
-                <div class="avatar" id="avatar-${nome}">${icone}</div>
-                <div class="name-tag">${nome}</div>
-            `;
-            arena.appendChild(container);
-            players[nome] = true;
-            document.getElementById('count').innerText = Object.keys(players).length;
-        } else {
-            document.getElementById(`avatar-${nome}`).innerText = icone;
-        }
+            pElement.style.left = `${2 + (acertos * 8.5)}%`;
 
-        const pElement = document.getElementById(`p-${nome}`);
-        const sElement = document.getElementById(`score-${nome}`);
-        sElement.innerText = acertos;
-        
-        // MOVIMENTO NO EIXO X (Vai para frente)
-        let eixoX = 2 + (acertos * 8.5); 
-        pElement.style.left = `${eixoX}%`;
+            if (tema !== 'tema-corrida') {
+                pElement.style.bottom = `${10 + (acertos * 4.5)}%`;
+                pElement.style.top = "auto"; 
+            } else {
+                let hash = nome.length * 5; 
+                pElement.style.top = `${20 + (hash % 50)}%`; 
+            }
 
-        // LÓGICA DE SUBIDA PARA TODOS OS TEMAS (exceto corrida plana)
-        if (temaAtual !== 'tema-corrida') {
-            let eixoY = 10 + (acertos * 4.5); // Sobe gradativamente
-            pElement.style.bottom = `${eixoY}%`;
-            pElement.style.top = "auto"; 
-        } else {
-            let hash = nome.length * 5; 
-            pElement.style.top = `${20 + (hash % 50)}%`; 
-        }
-
-        if (acertos >= META_PONTOS) {
-            document.getElementById('vencedor-nome').innerText = nome;
-            document.getElementById('podio').style.display = 'flex';
-        }
-    }
-
-    function iniciarEscuta() {
-        onSnapshot(collection(db, "salas", salaAtual, "jogadores"), (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                const dados = change.doc.data();
-                const nome = change.doc.id;
-                atualizarOuCriarJogador(nome, dados);
-            });
+            if (acertos >= META_PONTOS) {
+                document.getElementById('vencedor-nome').innerText = nome;
+                document.getElementById('podio').style.display = 'flex';
+            }
         });
-    }
-
-    window.resetarTudo = async () => {
-        if(confirm(`Isso vai limpar os jogadores e heróis da disciplina de ${salaAtual.toUpperCase()}. Continuar?`)) {
-            const queryJogadores = await getDocs(collection(db, "salas", salaAtual, "jogadores"));
-            const promessasJogadores = queryJogadores.docs.map(d => deleteDoc(doc(db, "salas", salaAtual, "jogadores", d.id)));
-            await Promise.all(promessasJogadores);
-            
-            await setDoc(doc(db, "salas", salaAtual, "configuracao", "personagens"), {});
-            alert("Arena limpa com sucesso!");
-            location.reload();
-        }
-    }
+    });
 </script>
 </body>
 </html>
