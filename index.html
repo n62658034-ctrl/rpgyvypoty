@@ -3,32 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Arena RPG</title>
+    <title>Arena RPG - Entrada</title>
     <style>
         body { background: #0f0f1a; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #1c1c2d; padding: 30px; border-radius: 20px; text-align: center; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #8e44ad; }
+        .card { background: #1c1c2d; padding: 30px; border-radius: 20px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid #8e44ad; }
+        .botoes-iniciais button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; border: none; transition: 0.3s; }
+        .btn-aluno { background: #3498db; color: white; } .btn-aluno:hover { background: #2980b9; transform: scale(1.05); }
+        .btn-prof { background: #e74c3c; color: white; } .btn-prof:hover { background: #c0392b; transform: scale(1.05); }
+        
+        .form-area { display: none; margin-top: 20px; }
         input, select { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; background: #2a2a40; color: white; text-align: center; font-size: 16px; }
-        button { width: 100%; padding: 12px; margin-top: 15px; background: #8e44ad; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        button:hover { background: #9b59b6; transform: scale(1.05); }
+        .btn-entrar { width: 100%; padding: 15px; background: #8e44ad; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-voltar { background: transparent; color: #aaa; border: none; margin-top: 15px; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>⚔️ Entrar na Batalha</h2>
-        <input type="text" id="nome" placeholder="Digite seu Nickname">
+        <h2 id="titulo-principal">🏰 Bem-vindo à Arena</h2>
         
-        <select id="disciplina">
-            <option value="" disabled selected>Escolha a Disciplina...</option>
-            <option value="matematica">Matemática</option>
-            <option value="portugues">Português</option>
-            <option value="biologia">Biologia</option>
-            <option value="historia">História</option>
-            <option value="geografia">Geografia</option>
-            <option value="fisica">Física</option>
-            <option value="quimica">Química</option>
-        </select>
+        <div id="escolha-papel" class="botoes-iniciais">
+            <button class="btn-aluno" onclick="mostrarForm('aluno')">👨‍🎓 ENTRAR COMO ALUNO</button>
+            <button class="btn-prof" onclick="mostrarForm('prof')">👨‍🏫 ENTRAR COMO PROFESSOR</button>
+        </div>
 
-        <button id="btnEntrar">AVANÇAR</button>
+        <div id="form-aluno" class="form-area">
+            <input type="text" id="nome-aluno" placeholder="Digite seu Nickname">
+            <select id="disciplina-aluno">
+                <option value="" disabled selected>Escolha a Disciplina...</option>
+                <option value="matematica">Matemática</option> <option value="portugues">Português</option>
+                <option value="biologia">Biologia</option> <option value="historia">História</option>
+            </select>
+            <button class="btn-entrar" id="btn-login-aluno">JOGAR</button>
+            <button class="btn-voltar" onclick="voltar()">Voltar</button>
+        </div>
+
+        <div id="form-prof" class="form-area">
+            <select id="disciplina-prof">
+                <option value="" disabled selected>Sua Disciplina...</option>
+                <option value="matematica">Matemática</option> <option value="portugues">Português</option>
+                <option value="biologia">Biologia</option> <option value="historia">História</option>
+            </select>
+            <input type="password" id="senha-prof" placeholder="Senha (1234)">
+            <button class="btn-entrar" id="btn-login-prof">ACESSAR PAINEL</button>
+            <button class="btn-voltar" onclick="voltar()">Voltar</button>
+        </div>
     </div>
 
     <script type="module">
@@ -42,26 +60,42 @@
     messagingSenderId: "338156073833",
     appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
     measurementId: "G-W93E7TJ59V"};
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        document.getElementById('btnEntrar').onclick = async () => {
-            const nick = document.getElementById('nome').value.trim();
-            const disciplina = document.getElementById('disciplina').value;
+        window.mostrarForm = (tipo) => {
+            document.getElementById('escolha-papel').style.display = 'none';
+            if(tipo === 'aluno') { document.getElementById('form-aluno').style.display = 'block'; document.getElementById('titulo-principal').innerText = "Área do Aluno"; }
+            else { document.getElementById('form-prof').style.display = 'block'; document.getElementById('titulo-principal').innerText = "Área do Professor"; }
+        }
 
+        window.voltar = () => {
+            document.getElementById('form-aluno').style.display = 'none';
+            document.getElementById('form-prof').style.display = 'none';
+            document.getElementById('escolha-papel').style.display = 'block';
+            document.getElementById('titulo-principal').innerText = "🏰 Bem-vindo à Arena";
+        }
+
+        // LOGIN ALUNO
+        document.getElementById('btn-login-aluno').onclick = async () => {
+            const nick = document.getElementById('nome-aluno').value.trim();
+            const disciplina = document.getElementById('disciplina-aluno').value;
             if (nick && disciplina) {
-                // Salva na gaveta correta da disciplina
-                await setDoc(doc(db, "salas", disciplina, "jogadores", nick), { acertos: 0, status: "online", sprite: "⏳" });
-                
-                // Salva no celular para as próximas telas lembrarem
+                await setDoc(doc(db, "salas", disciplina, "jogadores", nick), { acertos: 0, sprite: "⏳" }, { merge: true });
                 localStorage.setItem("usuarioAtivo", nick);
                 localStorage.setItem("disciplinaAtiva", disciplina);
-                
                 window.location.href = "selecao.html";
-            } else {
-                alert("Por favor, digite seu nome e escolha a disciplina!");
-            }
+            } else { alert("Preencha o nome e a disciplina!"); }
+        };
+
+        // LOGIN PROFESSOR
+        document.getElementById('btn-login-prof').onclick = () => {
+            const disciplina = document.getElementById('disciplina-prof').value;
+            const senha = document.getElementById('senha-prof').value;
+            if (disciplina && senha === "1234") {
+                localStorage.setItem("disciplinaAtiva", disciplina); // Salva para o admin saber a sala
+                window.location.href = "admin.html"; // Vai pro Painel Central
+            } else { alert("Senha ou Disciplina incorreta!"); }
         };
     </script>
 </body>
