@@ -2,77 +2,176 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel de Comando do Professor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Professor - Central</title>
     <style>
-        body { background: #1a1a2e; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .header-prof { background: #16213e; width: 100%; max-width: 800px; padding: 20px; border-radius: 15px; text-align: center; border: 2px solid #e94560; margin-bottom: 20px;}
+        :root { --primary: #8e44ad; --success: #2ecc71; --danger: #e74c3c; --dark: #0f0f1a; --card: rgba(28, 28, 45, 0.8); --gold: #ffd700; }
+        body { margin: 0; background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
         
-        /* BOTÕES GIGANTES */
-        .grid-botoes { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 800px; margin-bottom: 30px; }
-        .btn-gigante { padding: 30px; font-size: 20px; font-weight: bold; border-radius: 15px; cursor: pointer; border: none; display: flex; flex-direction: column; align-items: center; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .btn-gigante:hover { transform: translateY(-5px); }
-        
-        .btn-abrir { background: linear-gradient(45deg, #2980b9, #8e44ad); color: white; }
-        .btn-play { background: linear-gradient(45deg, #27ae60, #2ecc71); color: white; }
-        .btn-pause { background: linear-gradient(45deg, #c0392b, #e74c3c); color: white; }
-        .icon-btn { font-size: 40px; margin-bottom: 10px; }
+        /* SCROLLBAR MODERNA */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 5px; }
 
-        /* AREA DE CADASTRO FICA ESCONDIDA ATÉ CLICAR */
-        #area-cadastro { display: none; background: #16213e; padding: 30px; border-radius: 15px; width: 100%; max-width: 800px; border: 1px solid #0f3460; }
-        input, select { width: 100%; padding: 12px; margin: 5px 0 15px 0; border-radius: 8px; border: none; background: #0f3460; color: white; box-sizing: border-box;}
-        .btn-salvar { width: 100%; padding: 15px; background: #e94560; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+        /* HEADER DE CONTROLE (Fixo no topo) */
+        .admin-header { background: rgba(15, 15, 26, 0.95); backdrop-filter: blur(10px); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 2000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .header-title { margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; }
+        .header-controls { display: flex; align-items: center; gap: 15px; }
+        
+        /* SELECTS E INPUTS MODERNOS */
+        select, input { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 15px; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; }
+        select:focus, input:focus { border-color: var(--primary); background: rgba(255,255,255,0.15); }
+        select option { background: var(--dark); color: white; }
+
+        /* BOTÕES MODERNOS */
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-outline:hover { background: var(--primary); color: white; }
+        .btn-danger { background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); color: var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: white; }
+        
+        /* BOTÃO CIRCULAR DE PLAY/PAUSE */
+        .btn-play-circle { width: 55px; height: 55px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 20px rgba(46, 204, 113, 0.4); }
+        .btn-play-circle.play { background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; }
+        .btn-play-circle.pause { background: linear-gradient(135deg, #c0392b, #e74c3c); color: white; box-shadow: 0 0 20px rgba(231, 76, 60, 0.4); }
+        .btn-play-circle:hover { transform: scale(1.1); }
+
+        /* A ARENA EMBUTIDA (Ocupa boa parte da tela) */
+        #admin-arena { width: 100%; height: 55vh; position: relative; overflow: hidden; border-bottom: 5px solid #222; transition: 0.5s; background-size: cover; background-position: center;}
+        
+        /* CSS DOS TEMAS (Igual ao da projeção) */
+        .tema-corrida { background: linear-gradient(to bottom, #2c3e50, #111); }
+        .tema-pixel { background: #5c94fc; border-bottom: 30px solid #c84c0c !important; }
+        .tema-pixel::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 15px; background: #00a800; }
+        .tema-gelo { background: linear-gradient(to bottom, #a1c4fd, #c2e9fb); border-bottom: 30px solid #ffffff !important; }
+        .tema-dragao { background: linear-gradient(to bottom, #2b1055, #7597de); border-bottom: 30px solid #2c3e50 !important; }
+        .tema-medieval { background: linear-gradient(to bottom, #4ca1af, #c4e0e5); border-bottom: 30px solid #5d4037 !important; }
+        .tema-scifi { background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e); border-bottom: 30px solid #000 !important; }
+        .tema-inca { background: linear-gradient(to bottom, #11998e, #38ef7d); border-bottom: 30px solid #8d6e63 !important; }
+        .tema-dino { background: linear-gradient(to bottom, #ff7e5f, #feb47b); border-bottom: 30px solid #3e2723 !important; }
+        .tema-lego { background: #4fc3f7; border-bottom: 30px solid #e53935 !important; }
+
+        /* Elementos da Arena */
+        .finish-line { position: absolute; right: 8%; bottom: 5%; height: 70%; width: 50px; border: 3px solid rgba(255,255,255,0.3); border-radius: 10px 10px 0 0; display: flex; justify-content: center; background: rgba(255, 215, 0, 0.2); }
+        .finish-line::after { content: "🏁"; margin-top: -25px; font-size: 30px; }
+        .player-container { position: absolute; transition: all 0.6s ease; display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        .avatar { font-size: 35px; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.6)); }
+        .name-tag { background: rgba(0,0,0,0.8); color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-top: 3px; }
+
+        /* ÁREA INFERIOR (Formulário e Lista) */
+        .bottom-section { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; padding: 30px; max-width: 1200px; margin: 0 auto; }
+        .glass-card { background: var(--card); backdrop-filter: blur(10px); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        
+        h3 { color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 8px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 5px; }
+        .grid-opcoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        /* LISTA DE PERGUNTAS */
+        .lista-perguntas { max-height: 400px; overflow-y: auto; padding-right: 5px; }
+        .item-pergunta { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--primary); transition: 0.2s;}
+        .item-pergunta:hover { background: rgba(0,0,0,0.5); }
+        .item-text strong { display: block; margin-bottom: 5px; font-size: 15px; }
+        .item-text span { font-size: 12px; color: #2ecc71; }
+        .acoes { display: flex; gap: 5px; }
+        .btn-icon { background: rgba(255,255,255,0.1); border: none; padding: 8px; border-radius: 5px; cursor: pointer; color: white; transition: 0.2s; }
+        .btn-icon:hover { background: var(--primary); }
+        .btn-icon.del:hover { background: var(--danger); }
+
+        /* TELA DE LOGIN DO PROFESSOR */
+        #login-prof { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--dark); z-index: 3000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: var(--card); padding: 40px; border-radius: 15px; text-align: center; width: 300px; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
 
-<div class="header-prof">
-    <h1 style="margin:0;">Painel de Controle: <span id="nome-sala" style="color:#ffd700; text-transform: uppercase;"></span></h1>
-    <p>Selecione o cenário da batalha de hoje:</p>
-    <select id="select-tema" style="max-width: 400px; margin: 0 auto; display: block;">
-        <option value="tema-pixel">🍄 Castelo Retrô (Anos 90)</option>
-        <option value="tema-dino">🦖 Mundo dos Dinossauros</option>
-        <option value="tema-scifi">🚀 Ficção Científica (Neon)</option>
-        <option value="tema-corrida">🏃‍♂️ Arena de Corrida Clássica</option>
-    </select>
-</div>
-
-<div class="grid-botoes">
-    <button class="btn-gigante btn-abrir" onclick="abrirCampoDeBatalha()">
-        <span class="icon-btn">🏟️</span> ABRIR CAMPO DE BATALHA
-    </button>
-    
-    <button class="btn-gigante btn-play" id="btn-estado-jogo" onclick="alternarPlay()">
-        <span class="icon-btn">▶️</span> DAR PLAY NAS PERGUNTAS
-    </button>
-
-    <button class="btn-gigante" style="background:#f39c12; color:black;" onclick="mostrarCadastro()">
-        <span class="icon-btn">📝</span> CADASTRAR PERGUNTAS
-    </button>
-
-    <button class="btn-gigante" style="background:#555; color:white;" onclick="limparTurma()">
-        <span class="icon-btn">🧹</span> ZERAR PONTOS DA SALA
-    </button>
-</div>
-
-<div id="area-cadastro">
-    <h2>Cadastrar Nova Pergunta</h2>
-    <label>Enunciado:</label> <input type="text" id="txt-pergunta">
-    <label>Opções (A, B, C, D):</label>
-    <div style="display:flex; gap:10px;">
-        <input type="text" id="opt0" placeholder="A"> <input type="text" id="opt1" placeholder="B">
-        <input type="text" id="opt2" placeholder="C"> <input type="text" id="opt3" placeholder="D">
+<div id="login-prof">
+    <div class="login-box">
+        <h2 style="color:var(--primary); margin-top:0;">Área do Professor</h2>
+        <select id="login-disciplina" style="width:100%; margin-bottom:15px;">
+            <option value="" disabled selected>Sua Disciplina...</option>
+            <option value="matematica">Matemática</option> <option value="portugues">Português</option>
+            <option value="biologia">Biologia</option> <option value="historia">História</option>
+            <option value="geografia">Geografia</option> <option value="fisica">Física</option>
+            <option value="quimica">Química</option>
+        </select>
+        <input type="password" id="login-senha" placeholder="Senha (1234)" style="width:100%; margin-bottom:20px; box-sizing:border-box;">
+        <button class="btn" style="width:100%; background:var(--primary); color:white;" onclick="logar()">ENTRAR NO COMANDO</button>
     </div>
-    <label>Correta:</label>
-    <select id="select-correta">
-        <option value="0">Opção A</option> <option value="1">Opção B</option>
-        <option value="2">Opção C</option> <option value="3">Opção D</option>
-    </select>
-    <button class="btn-salvar" id="btnSalvar">SALVAR PERGUNTA NO BANCO</button>
+</div>
+
+<div id="painel-principal" style="display:none;">
+
+    <div class="admin-header">
+        <h2 class="header-title">🛡️ <span id="nome-sala-display">SALA</span></h2>
+        
+        <div class="header-controls">
+            <select id="select-tema" onchange="mudarCenario()" title="Escolha o Cenário">
+                <option value="tema-pixel">🍄 Castelo Retrô</option>
+                <option value="tema-gelo">🧊 Era do Gelo</option>
+                <option value="tema-dragao">🐉 Dragões</option>
+                <option value="tema-medieval">🏰 Medieval</option>
+                <option value="tema-scifi">🚀 Sci-Fi</option>
+                <option value="tema-inca">🛕 Incas</option>
+                <option value="tema-dino">🦖 Dinossauros</option>
+                <option value="tema-lego">🧱 Lego</option>
+                <option value="tema-corrida">🏃 Corrida Plana</option>
+            </select>
+            
+            <button class="btn btn-outline" onclick="abrirProjecao()">📺 PROJETAR ARENA</button>
+            <button class="btn btn-danger" onclick="limparTurma()">🧹 ZERAR SALA</button>
+            
+            <button id="btn-play-circle" class="btn-play-circle play" onclick="alternarPlay()" title="Dar Play nas Perguntas">
+                ▶️
+            </button>
+        </div>
+    </div>
+
+    <div id="admin-arena" class="tema-pixel">
+        <div class="finish-line"></div>
+        </div>
+
+    <div class="bottom-section">
+        
+        <div class="glass-card">
+            <h3 id="titulo-form">📝 Nova Pergunta</h3>
+            <div class="form-group">
+                <label>Enunciado da Pergunta</label>
+                <input type="text" id="txt-pergunta" placeholder="Digite a pergunta aqui...">
+            </div>
+            
+            <label style="font-size: 13px; color: #aaa;">Alternativas</label>
+            <div class="grid-opcoes form-group">
+                <input type="text" id="opt0" placeholder="Opção A (0)">
+                <input type="text" id="opt1" placeholder="Opção B (1)">
+                <input type="text" id="opt2" placeholder="Opção C (2)">
+                <input type="text" id="opt3" placeholder="Opção D (3)">
+            </div>
+
+            <div class="form-group">
+                <label>Qual é a correta?</label>
+                <select id="select-correta">
+                    <option value="0">Opção A</option> <option value="1">Opção B</option>
+                    <option value="2">Opção C</option> <option value="3">Opção D</option>
+                </select>
+            </div>
+
+            <button class="btn" style="width:100%; background:var(--primary); color:white;" id="btnSalvar">SALVAR PERGUNTA</button>
+        </div>
+
+        <div class="glass-card">
+            <h3>📋 Banco de Missões</h3>
+            <div class="lista-perguntas" id="lista-render">
+                </div>
+        </div>
+
+    </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, addDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDocs, addDoc, collection, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
     authDomain: "yvypoty-491e8.firebaseapp.com",
@@ -84,62 +183,197 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const disciplina = localStorage.getItem("disciplinaAtiva");
-    if(!disciplina) { window.location.href = "index.html"; }
-    document.getElementById('nome-sala').innerText = disciplina;
-
+    let disciplina = "";
     let jogoRodando = false;
+    let editandoId = null;
+    const players = {};
+    const META_PONTOS = 10;
 
-    // ABRIR CAMPO (Nova Janela)
-    window.abrirCampoDeBatalha = () => {
-        const tema = document.getElementById('select-tema').value;
-        localStorage.setItem("temaAtivo", tema); // Salva o tema para a dashboard ler
-        window.open("dashboard.html", "_blank"); // Abre em nova guia
-    }
-
-    // O "SEMÁFORO" DO PLAY E PAUSE
-    window.alternarPlay = async () => {
-        jogoRodando = !jogoRodando;
-        await setDoc(doc(db, "salas", disciplina, "configuracao", "estado"), { jogando: jogoRodando }, { merge: true });
-        
-        const btn = document.getElementById('btn-estado-jogo');
-        if(jogoRodando) {
-            btn.className = "btn-gigante btn-pause";
-            btn.innerHTML = `<span class="icon-btn">⏸️</span> PAUSAR PERGUNTAS`;
+    // --- 1. LOGIN DO PROFESSOR ---
+    window.logar = () => {
+        disciplina = document.getElementById('login-disciplina').value;
+        const senha = document.getElementById('login-senha').value;
+        if(disciplina && senha === "1234") {
+            document.getElementById('login-prof').style.display = 'none';
+            document.getElementById('painel-principal').style.display = 'block';
+            document.getElementById('nome-sala-display').innerText = disciplina.toUpperCase();
+            localStorage.setItem("disciplinaAtiva", disciplina); // Salva para a projeção saber
+            
+            iniciarEscutaArena();
+            iniciarEscutaPerguntas();
+            verificarEstadoPlay();
         } else {
-            btn.className = "btn-gigante btn-play";
-            btn.innerHTML = `<span class="icon-btn">▶️</span> DAR PLAY NAS PERGUNTAS`;
+            alert("Senha ou Disciplina inválida.");
         }
     }
 
-    // LÓGICA DO CADASTRO
-    window.mostrarCadastro = () => {
-        const area = document.getElementById('area-cadastro');
-        area.style.display = area.style.display === 'block' ? 'none' : 'block';
+    // --- 2. CONTROLES DO HEADER ---
+    window.mudarCenario = () => {
+        const tema = document.getElementById('select-tema').value;
+        document.getElementById('admin-arena').className = tema;
+        localStorage.setItem("temaAtivo", tema); // Salva para quando abrir a projeção
     }
 
+    window.abrirProjecao = () => {
+        window.open("dashboard.html", "_blank");
+    }
+
+    window.alternarPlay = async () => {
+        jogoRodando = !jogoRodando;
+        await setDoc(doc(db, "salas", disciplina, "configuracao", "estado"), { jogando: jogoRodando }, { merge: true });
+        atualizarBotaoPlay();
+    }
+
+    function atualizarBotaoPlay() {
+        const btn = document.getElementById('btn-play-circle');
+        if(jogoRodando) {
+            btn.className = "btn-play-circle pause";
+            btn.innerHTML = "⏸️";
+            btn.title = "Pausar Perguntas";
+        } else {
+            btn.className = "btn-play-circle play";
+            btn.innerHTML = "▶️";
+            btn.title = "Dar Play nas Perguntas";
+        }
+    }
+
+    function verificarEstadoPlay() {
+        onSnapshot(doc(db, "salas", disciplina, "configuracao", "estado"), (docSnap) => {
+            if (docSnap.exists()) {
+                jogoRodando = docSnap.data().jogando || false;
+                atualizarBotaoPlay();
+            }
+        });
+    }
+
+    window.limparTurma = async () => {
+        if(confirm("Tem certeza que deseja ZERAR todos os pontos e deslogar os alunos da sala de " + disciplina.toUpperCase() + "?")) {
+            const queryJogadores = await getDocs(collection(db, "salas", disciplina, "jogadores"));
+            queryJogadores.forEach(d => deleteDoc(doc(db, "salas", disciplina, "jogadores", d.id)));
+            
+            await setDoc(doc(db, "salas", disciplina, "configuracao", "personagens"), {});
+            await setDoc(doc(db, "salas", disciplina, "configuracao", "estado"), { jogando: false }, { merge: true });
+            
+            document.getElementById('admin-arena').innerHTML = '<div class="finish-line"></div>'; // Limpa a tela local
+            alert("Sala purificada!");
+        }
+    }
+
+    // --- 3. A ARENA EMBUTIDA (Visão do Prof) ---
+    function iniciarEscutaArena() {
+        const arenaDOM = document.getElementById('admin-arena');
+        onSnapshot(collection(db, "salas", disciplina, "jogadores"), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const dados = change.doc.data();
+                const nome = change.doc.id;
+                let acertos = dados.acertos || 0;
+                let icone = dados.sprite || "⏳";
+
+                if (change.type === "removed") {
+                    const el = document.getElementById(`p-admin-${nome}`);
+                    if (el) el.remove();
+                    delete players[nome];
+                    return;
+                }
+
+                if (!players[nome]) {
+                    const container = document.createElement('div');
+                    container.id = `p-admin-${nome}`;
+                    container.className = 'player-container';
+                    container.innerHTML = `<div class="avatar">${icone}</div><div class="name-tag">${nome} (${acertos})</div>`;
+                    arenaDOM.appendChild(container);
+                    players[nome] = true;
+                } else {
+                    document.querySelector(`#p-admin-${nome} .avatar`).innerText = icone;
+                    document.querySelector(`#p-admin-${nome} .name-tag`).innerText = `${nome} (${acertos})`;
+                }
+
+                const pElement = document.getElementById(`p-admin-${nome}`);
+                const temaAtual = document.getElementById('select-tema').value;
+                
+                // Lógica de Movimento simplificada para o painel do professor
+                pElement.style.left = `${5 + (acertos * 8)}%`;
+                
+                if (temaAtual !== 'tema-corrida') {
+                    pElement.style.bottom = `${10 + (acertos * 5)}%`;
+                    pElement.style.top = "auto";
+                } else {
+                    let hash = nome.length * 5; 
+                    pElement.style.top = `${20 + (hash % 50)}%`;
+                }
+            });
+        });
+    }
+
+    // --- 4. GESTÃO DE PERGUNTAS ---
     document.getElementById('btnSalvar').onclick = async () => {
         const p = document.getElementById('txt-pergunta').value;
         const o0 = document.getElementById('opt0').value; const o1 = document.getElementById('opt1').value;
         const o2 = document.getElementById('opt2').value; const o3 = document.getElementById('opt3').value;
         const correta = parseInt(document.getElementById('select-correta').value);
 
-        if (p && o0 && o1) {
-            await addDoc(collection(db, "salas", disciplina, "perguntas"), { enunciado: p, opcoes: [o0, o1, o2, o3], correta: correta });
-            alert("Pergunta Salva!");
-            document.getElementById('txt-pergunta').value = ""; // Limpa campo
-        }
+        if (!p || !o0 || !o1) { alert("Preencha o enunciado e as alternativas principais!"); return; }
+        const dados = { enunciado: p, opcoes: [o0, o1, o2, o3], correta: correta };
+
+        try {
+            if(editandoId) {
+                await updateDoc(doc(db, "salas", disciplina, "perguntas", editandoId), dados);
+                editandoId = null;
+                document.getElementById('titulo-form').innerText = "📝 Nova Pergunta";
+                document.getElementById('btnSalvar').innerText = "SALVAR PERGUNTA";
+                document.getElementById('btnSalvar').style.background = "var(--primary)";
+            } else {
+                await addDoc(collection(db, "salas", disciplina, "perguntas"), dados);
+            }
+            limparForm();
+        } catch (error) { alert("Erro ao salvar."); }
     }
 
-    window.limparTurma = async () => {
-        if(confirm("Apagar pontos e heróis ocupados?")) {
-            const queryJogadores = await getDocs(collection(db, "salas", disciplina, "jogadores"));
-            queryJogadores.forEach(d => deleteDoc(doc(db, "salas", disciplina, "jogadores", d.id)));
-            await setDoc(doc(db, "salas", disciplina, "configuracao", "personagens"), {});
-            await setDoc(doc(db, "salas", disciplina, "configuracao", "estado"), { jogando: false }, { merge: true });
-            alert("Turma zerada!");
-            location.reload();
-        }
+    function limparForm() {
+        document.getElementById('txt-pergunta').value = "";
+        document.getElementById('opt0').value = ""; document.getElementById('opt1').value = "";
+        document.getElementById('opt2').value = ""; document.getElementById('opt3').value = "";
+    }
+
+    function iniciarEscutaPerguntas() {
+        onSnapshot(collection(db, "salas", disciplina, "perguntas"), (snapshot) => {
+            const painel = document.getElementById('lista-render');
+            painel.innerHTML = "";
+            if(snapshot.empty) { painel.innerHTML = "<p style='color:#aaa;'>Nenhuma pergunta cadastrada.</p>"; return; }
+
+            snapshot.forEach((documento) => {
+                const q = documento.data(); const id = documento.id;
+                const div = document.createElement('div');
+                div.className = "item-pergunta";
+                div.innerHTML = `
+                    <div class="item-text">
+                        <strong>${q.enunciado}</strong>
+                        <span>Correta: ${q.opcoes[q.correta]}</span>
+                    </div>
+                    <div class="acoes">
+                        <button class="btn-icon" onclick="editar('${id}', '${q.enunciado.replace(/'/g, "\\'")}', '${q.opcoes[0]}', '${q.opcoes[1]}', '${q.opcoes[2]}', '${q.opcoes[3]}', ${q.correta})" title="Editar">✏️</button>
+                        <button class="btn-icon del" onclick="deletar('${id}')" title="Excluir">🗑️</button>
+                    </div>
+                `;
+                painel.appendChild(div);
+            });
+        });
+    }
+
+    window.editar = (id, en, o0, o1, o2, o3, cor) => {
+        editandoId = id;
+        document.getElementById('txt-pergunta').value = en;
+        document.getElementById('opt0').value = o0; document.getElementById('opt1').value = o1;
+        document.getElementById('opt2').value = o2; document.getElementById('opt3').value = o3;
+        document.getElementById('select-correta').value = cor;
+        
+        document.getElementById('titulo-form').innerText = "✏️ Editando Pergunta";
+        document.getElementById('btnSalvar').innerText = "ATUALIZAR PERGUNTA";
+        document.getElementById('btnSalvar').style.background = "#f39c12";
+    }
+
+    window.deletar = async (id) => {
+        if(confirm("Excluir esta pergunta permanentemente?")) await deleteDoc(doc(db, "salas", disciplina, "perguntas", id));
     }
 </script>
 </body>
