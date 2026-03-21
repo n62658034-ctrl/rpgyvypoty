@@ -2,42 +2,98 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Projetor - Arena</title>
+    <title>Projetor - Grande Arena</title>
     <style>
-        :root { --gold: #ffd700; }
-        body { margin: 0; background: #1a1a1a; color: white; font-family: sans-serif; overflow: hidden; }
-        header { background: rgba(0,0,0,0.8); padding: 10px; text-align: center; border-bottom: 3px solid var(--gold); position: relative; z-index: 100; }
-        #arena { position: relative; width: 100vw; height: 85vh; transition: background 1s ease-in-out; overflow: hidden; background-size: cover; background-position: center; }
+        :root { --gold: #ffd700; --silver: #c0c0c0; --bronze: #cd7f32; }
+        body { margin: 0; background: #1a1a1a; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         
-        /* TEMAS BÁSICOS (Mantenha os outros aqui se quiser) */
-        .tema-corrida { background: linear-gradient(to bottom, #2c3e50, #111); border-bottom: 10px solid #455a64; }
-        .tema-corrida .finish-line { position: absolute; right: 10%; height: 100%; width: 30px; background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px); opacity: 0.5; border-left: 2px solid white; }
+        header { background: rgba(0,0,0,0.85); padding: 15px; text-align: center; border-bottom: 3px solid var(--gold); position: relative; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        h1 { margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
         
-        .linha-pixel { position: absolute; right: 10%; bottom: 10%; height: 60%; width: 60px; border: 4px solid #000; display: flex; align-items: flex-start; justify-content: center; font-size: 30px; border-radius: 10px 10px 0 0; }
-        .linha-pixel::after { content: "👑"; margin-top: -25px; filter: drop-shadow(0 0 10px gold); }
-        .tema-pixel { background: #5c94fc; border-bottom: 40px solid #c84c0c; }
-        .tema-pixel::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; background: #00a800; }
-        .tema-pixel .finish-line { @extend .linha-pixel; background: #f8d820; right: 10%; bottom: 10%; height: 60%; width: 60px; position: absolute; border: 4px solid #000; border-radius: 10px 10px 0 0; display: flex; justify-content: center; }
-        .tema-pixel .finish-line::after { content: "👑"; margin-top: -25px; }
+        #arena { position: relative; width: 100vw; height: 85vh; transition: background 1s ease-in-out; overflow: hidden; }
+        
+        /* =========================================
+           OS SUPER CENÁRIOS (Emojis convertidos em Background)
+           ========================================= */
+        .tema-corrida { background: linear-gradient(to bottom, #2c3e50, #111); border-bottom: 20px solid #455a64; }
+        
+        .tema-pixel { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><text x='20' y='280' font-size='120'>🍄</text><text x='150' y='100' font-size='60'>☁️</text></svg>"), linear-gradient(to bottom, #5c94fc, #87b4ff); border-bottom: 40px solid #c84c0c; box-shadow: inset 0 -15px 0 #00a800; }
+        
+        .tema-gelo { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><text x='50' y='280' font-size='150'>🏔️</text><text x='250' y='280' font-size='100'>⛄</text></svg>"), linear-gradient(to bottom, #a1c4fd, #c2e9fb); border-bottom: 40px solid #fff; box-shadow: inset 0 -10px 0 #b2ebf2; }
+        
+        .tema-dragao { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='500' height='300'><text x='20' y='280' font-size='180'>🏰</text><text x='300' y='150' font-size='100'>🐉</text></svg>"), linear-gradient(to bottom, #2b1055, #7597de); border-bottom: 40px solid #111; box-shadow: inset 0 -15px 0 #e74c3c; }
+        
+        .tema-medieval { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><text x='10' y='280' font-size='130'>🏘️</text><text x='200' y='280' font-size='150'>🕍</text></svg>"), linear-gradient(to bottom, #4ca1af, #c4e0e5); border-bottom: 40px solid #5d4037; }
+        
+        .tema-scifi { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><text x='50' y='280' font-size='150'>🌃</text><text x='250' y='100' font-size='80'>🛸</text></svg>"), linear-gradient(to bottom, #0f0c29, #302b63, #24243e); border-bottom: 40px solid #000; box-shadow: inset 0 -5px 20px #00ffff; }
+        
+        .tema-inca { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><text x='50' y='280' font-size='180'>🛕</text><text x='250' y='280' font-size='100'>🌴</text></svg>"), linear-gradient(to bottom, #11998e, #38ef7d); border-bottom: 40px solid #8d6e63; box-shadow: inset 0 -15px 0 #2e7d32; }
+        
+        .tema-dino { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><text x='20' y='280' font-size='120'>🌋</text><text x='200' y='280' font-size='150'>🦖</text></svg>"), linear-gradient(to bottom, #ff7e5f, #feb47b); border-bottom: 40px solid #3e2723; box-shadow: inset 0 -20px 0 #1b5e20; }
+        
+        .tema-lego { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='300'><text x='50' y='280' font-size='100'>🧱</text></svg>"), background-color: #4fc3f7; border-bottom: 40px solid #e53935; box-shadow: inset 0 -20px 0 #fdd835; }
 
-        .player-container { position: absolute; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; align-items: center; z-index: 10; }
-        .avatar { font-size: 50px; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.6)); }
-        .name-tag { background: rgba(255,255,255,0.9); color: black; padding: 2px 8px; border-radius: 5px; font-size: 13px; font-weight: bold; margin-top: 5px; }
-        .score-bubble { background: var(--gold); color: #000; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-weight: bold; position: absolute; top: -25px; border: 2px solid black; }
+        /* LINHA DE CHEGADA */
+        .finish-line { position: absolute; right: 10%; bottom: 0; height: 100%; width: 50px; border-left: 5px dashed white; border-right: 5px dashed white; background: rgba(255, 215, 0, 0.2); display: flex; align-items: flex-start; justify-content: center; }
+        .finish-line::after { content: "🏁"; font-size: 50px; background: rgba(0,0,0,0.7); border-radius: 50%; padding: 10px; margin-top: 20px; box-shadow: 0 0 20px var(--gold); }
 
-        #podio { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: var(--gold); }
+        /* BONECOS DA ARENA */
+        .player-container { position: absolute; transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; align-items: center; z-index: 10; }
+        .avatar { font-size: 60px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
+        .name-tag { background: rgba(0,0,0,0.8); color: white; padding: 4px 10px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); }
+        .score-bubble { background: var(--gold); color: #000; border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 16px; position: absolute; top: -20px; border: 3px solid black; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+
+        /* ALERTA DE QUEM CRUZOU A LINHA (1 Segundo) */
+        #alerta-chegada { position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); border: 3px solid var(--gold); color: white; font-size: 30px; font-weight: bold; padding: 20px 40px; border-radius: 20px; z-index: 2000; display: none; text-align: center; box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5); animation: popIn 0.3s ease-out; }
+        @keyframes popIn { 0% { transform: translate(-50%, -100%) scale(0.5); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+
+        /* TELA DE PÓDIO (TOP 3) */
+        #podio-tela { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; }
+        .podio-container { display: flex; align-items: flex-end; justify-content: center; gap: 20px; height: 400px; margin-top: 50px; }
+        .lugar { display: flex; flex-direction: column; align-items: center; width: 150px; }
+        .lugar .avatar { font-size: 80px; margin-bottom: 10px; animation: bounce 2s infinite; }
+        .lugar .nome { font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center; color: white; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 10px;}
+        
+        .pilar { width: 100%; display: flex; align-items: flex-start; justify-content: center; font-size: 50px; font-weight: bold; padding-top: 20px; border-radius: 15px 15px 0 0; box-shadow: inset 0 10px 20px rgba(255,255,255,0.3); }
+        .pilar-1 { height: 250px; background: linear-gradient(to bottom, var(--gold), #b8860b); color: #fff; text-shadow: 0 2px 4px #000; }
+        .pilar-2 { height: 180px; background: linear-gradient(to bottom, var(--silver), #7f8c8d); color: #fff; text-shadow: 0 2px 4px #000; }
+        .pilar-3 { height: 130px; background: linear-gradient(to bottom, var(--bronze), #8d6e63); color: #fff; text-shadow: 0 2px 4px #000; }
+        
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+        /* CONFETES */
+        .confetti { position: absolute; width: 10px; height: 10px; background-color: #f00; animation: fall linear forwards; z-index: 3001; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
     </style>
 </head>
 <body>
 
-<div id="podio">
-    <h1 style="font-size: 120px; margin: 0;">🏆</h1>
-    <h1 id="vencedor-nome" style="font-size: 60px;">NOME</h1>
-    <h2 style="color: white;">CRUZOU A LINHA DE CHEGADA!</h2>
+<div id="alerta-chegada">🎉 <span id="nome-chegada"></span> CRUZOU A LINHA! 🎉</div>
+
+<div id="podio-tela">
+    <h1 style="color: var(--gold); font-size: 60px; text-shadow: 0 5px 15px rgba(255,215,0,0.5); margin:0;">🏆 CAMPEÕES DA BATALHA 🏆</h1>
+    
+    <div class="podio-container">
+        <div class="lugar" id="lugar-2" style="opacity: 0;">
+            <div class="avatar" id="avatar-2">👤</div>
+            <div class="nome" id="nome-2">---</div>
+            <div class="pilar pilar-2">2º</div>
+        </div>
+        <div class="lugar" id="lugar-1" style="opacity: 0;">
+            <div class="avatar" id="avatar-1">👤</div>
+            <div class="nome" id="nome-1">---</div>
+            <div class="pilar pilar-1">1º</div>
+        </div>
+        <div class="lugar" id="lugar-3" style="opacity: 0;">
+            <div class="avatar" id="avatar-3">👤</div>
+            <div class="nome" id="nome-3">---</div>
+            <div class="pilar pilar-3">3º</div>
+        </div>
+    </div>
 </div>
 
 <header>
-    <h1>🏆 BATALHA DE <span id="titulo-sala" style="color:var(--gold);"></span> 🏆</h1>
+    <h1>⚔️ CAMPO DE BATALHA: <span id="titulo-sala" style="color:var(--gold);">---</span> ⚔️</h1>
 </header>
 
 <div id="arena">
@@ -58,52 +114,129 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
-    // Lê as escolhas que o professor fez no admin.html
     const disciplina = localStorage.getItem("disciplinaAtiva");
     const tema = localStorage.getItem("temaAtivo") || "tema-corrida";
     
-    if(!disciplina) { alert("Erro: Disciplina não definida!"); }
+    if(!disciplina) { alert("Erro de conexão. Inicie pelo painel do professor."); }
 
     document.getElementById('titulo-sala').innerText = disciplina.toUpperCase();
     document.getElementById('arena').className = tema; 
 
     const players = {};
     const META_PONTOS = 10; 
+    let vencedores = []; // Guarda os top 3
+    let podioExibido = false;
 
+    // --- FUNÇÃO DO ALERTA RÁPIDO ---
+    function mostrarAlertaCruzamento(nome) {
+        const alerta = document.getElementById('alerta-chegada');
+        document.getElementById('nome-chegada').innerText = nome.toUpperCase();
+        alerta.style.display = 'block';
+        
+        // Esconde depois de 2 segundos
+        setTimeout(() => { alerta.style.display = 'none'; }, 2000);
+    }
+
+    // --- FUNÇÃO DO PÓDIO FINAL COM CONFETES ---
+    function dispararConfetes() {
+        const cores = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffd700'];
+        for(let i = 0; i < 150; i++) {
+            let confete = document.createElement('div');
+            confete.className = 'confetti';
+            confete.style.left = Math.random() * 100 + 'vw';
+            confete.style.backgroundColor = cores[Math.floor(Math.random() * cores.length)];
+            confete.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            confete.style.animationDelay = Math.random() * 2 + 's';
+            document.getElementById('podio-tela').appendChild(confete);
+        }
+    }
+
+    function exibirPodioFinal() {
+        if(podioExibido) return;
+        podioExibido = true;
+        
+        const tela = document.getElementById('podio-tela');
+        tela.style.display = 'flex';
+
+        // Preenche os dados (Se houver 1º, 2º e 3º)
+        if(vencedores[0]) {
+            document.getElementById('nome-1').innerText = vencedores[0].nome;
+            document.getElementById('avatar-1').innerText = vencedores[0].icone;
+            setTimeout(() => document.getElementById('lugar-1').style.opacity = '1', 500);
+        }
+        if(vencedores[1]) {
+            document.getElementById('nome-2').innerText = vencedores[1].nome;
+            document.getElementById('avatar-2').innerText = vencedores[1].icone;
+            setTimeout(() => document.getElementById('lugar-2').style.opacity = '1', 1000);
+        }
+        if(vencedores[2]) {
+            document.getElementById('nome-3').innerText = vencedores[2].nome;
+            document.getElementById('avatar-3').innerText = vencedores[2].icone;
+            setTimeout(() => document.getElementById('lugar-3').style.opacity = '1', 1500);
+        }
+
+        dispararConfetes();
+    }
+
+    // --- ESCUTA O BANCO DE DADOS EM TEMPO REAL ---
     onSnapshot(collection(db, "salas", disciplina, "jogadores"), (snapshot) => {
+        const totalJogadores = snapshot.docs.length;
+
         snapshot.docChanges().forEach((change) => {
             const dados = change.doc.data();
             const nome = change.doc.id;
             let acertos = dados.acertos || 0;
             let icone = dados.sprite || "⏳";
 
+            // Se for removido (Reset da sala)
+            if(change.type === "removed") {
+                location.reload(); return;
+            }
+
+            // Cria o boneco se não existir
             if (!players[nome]) {
                 const container = document.createElement('div');
                 container.id = `p-${nome}`;
                 container.className = 'player-container';
                 container.innerHTML = `<div class="score-bubble" id="score-${nome}">0</div><div class="avatar" id="avatar-${nome}">${icone}</div><div class="name-tag">${nome}</div>`;
                 document.getElementById('arena').appendChild(container);
-                players[nome] = true;
+                players[nome] = { nome: nome, icone: icone, terminou: false };
             } else {
                 document.getElementById(`avatar-${nome}`).innerText = icone;
+                players[nome].icone = icone;
             }
 
             const pElement = document.getElementById(`p-${nome}`);
             document.getElementById(`score-${nome}`).innerText = acertos;
             
-            pElement.style.left = `${2 + (acertos * 8.5)}%`;
+            // CÁLCULO DE MOVIMENTO (8.5% avança até a linha que está nos 90%)
+            let avancoX = 5 + (acertos * 8.5);
+            // Trava visualmente na linha de chegada se passar da meta
+            if (avancoX > 85) avancoX = 85; 
+            
+            pElement.style.left = `${avancoX}%`;
 
+            // Movimento vertical (Degraus) para temas Pixel, ou livre para Corrida
             if (tema !== 'tema-corrida') {
-                pElement.style.bottom = `${10 + (acertos * 4.5)}%`;
+                pElement.style.bottom = `${15 + (acertos * 5)}%`;
                 pElement.style.top = "auto"; 
             } else {
                 let hash = nome.length * 5; 
                 pElement.style.top = `${20 + (hash % 50)}%`; 
             }
 
-            if (acertos >= META_PONTOS) {
-                document.getElementById('vencedor-nome').innerText = nome;
-                document.getElementById('podio').style.display = 'flex';
+            // --- LÓGICA DE CHEGADA E PÓDIO ---
+            if (acertos >= META_PONTOS && !players[nome].terminou) {
+                players[nome].terminou = true;
+                vencedores.push({ nome: nome, icone: icone });
+                
+                // Dispara o flash de aviso "Cruzou a linha!"
+                mostrarAlertaCruzamento(nome);
+
+                // Se já temos 3 vencedores OU se todos os alunos da sala terminaram
+                if (vencedores.length === 3 || vencedores.length === totalJogadores) {
+                    setTimeout(() => { exibirPodioFinal(); }, 2500); // Espera o alerta sumir
+                }
             }
         });
     });
