@@ -32,17 +32,7 @@
                     },
                     borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
                     spacing: { "gutter": "24px", "unit": "8px", "margin-mobile": "20px", "container-max": "1440px", "margin-desktop": "64px" },
-                    fontFamily: { "body-lg": ["Sora"], "label-lg": ["Sora"], "headline-md": ["Sora"], "body-md": ["Sora"], "label-sm": ["Sora"], "headline-lg": ["Sora"], "display-lg": ["Sora"], "display-lg-mobile": ["Sora"] },
-                    fontSize: {
-                        "body-lg": ["18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400" }],
-                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
-                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "700" }],
-                        "body-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
-                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
-                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
-                        "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
-                        "display-lg-mobile": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }]
-                    }
+                    fontFamily: { "body-lg": ["Sora"], "label-lg": ["Sora"], "headline-md": ["Sora"], "body-md": ["Sora"], "label-sm": ["Sora"], "headline-lg": ["Sora"], "display-lg": ["Sora"], "display-lg-mobile": ["Sora"] }
                 }
             }
         };
@@ -72,7 +62,6 @@
         .grid-item-5 { animation-delay: 0.25s; } .grid-item-6 { animation-delay: 0.3s; }
         .grid-item-7 { animation-delay: 0.35s; } .grid-item-8 { animation-delay: 0.4s; }
 
-        /* Estilo da Imagem do Avatar */
         .avatar-img { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); transition: transform 0.3s; }
         .hero-card:hover:not(.taken) .avatar-img { transform: scale(1.15) translateY(-5px); }
     </style>
@@ -123,13 +112,13 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
+        const firebaseConfig = { apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
     authDomain: "yvypoty-491e8.firebaseapp.com",
     projectId: "yvypoty-491e8",
     storageBucket: "yvypoty-491e8.firebasestorage.app",
     messagingSenderId: "338156073833",
     appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
-    measurementId: "G-W93E7TJ59V"};
+    measurementId: "G-W93E7TJ59V" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -142,7 +131,7 @@
         document.getElementById('display-pin').innerText = salaPIN;
         document.getElementById('display-nick').innerText = nick;
 
-        // LISTA DE 25 PERSONAGENS
+        // LISTA DE 26 PERSONAGENS (Mascote Adicionado)
         const herois = [
             { id: "predador", nome: "Predador", sprite: "img/predador.png", tier: "world-cup" },
             { id: "mago", nome: "Mago", sprite: "img/mago.png", tier: "standard" },
@@ -168,12 +157,13 @@
             { id: "scrat", nome: "Scrash", sprite: "img/scrash.png", tier: "standard" },
             { id: "olaf", nome: "Olaf", sprite: "img/olaf.png", tier: "standard" },
             { id: "caveira", nome: "Caveira", sprite: "img/caveira.png", tier: "standard" },
-            { id: "pinoquio", nome: "Pinóquio", sprite: "img/pinoquio.png", tier: "standard" }
+            { id: "pinoquio", nome: "Pinóquio", sprite: "img/pinoquio.png", tier: "standard" },
+            { id: "mascote", nome: "Mascote", sprite: "img/mascote.png", tier: "world-cup" }
         ];
 
         const gridContainer = document.getElementById('hero-grid');
 
-        // Escuta a seleção em Tempo Real da Sala Específica (PIN)
+        // Escuta a seleção em Tempo Real
         onSnapshot(doc(db, "salas", salaPIN, "configuracao", "personagens"), (snap) => {
             const ocupados = snap.data() || {};
             gridContainer.innerHTML = '';
@@ -190,16 +180,12 @@
                     entry-anim grid-item-${(index % 8) + 1}
                 `;
 
-                // Tag Dourada para personagens Épicos
                 const badgeHtml = isWorldCup ? 
                     `<div class="absolute top-2 right-2 bg-primary-container text-on-primary-container font-label-sm text-[10px] px-2 py-1 rounded-full uppercase tracking-wider font-bold shadow-lg z-10 flex items-center gap-1">
                         <span class="material-symbols-outlined text-[12px]">workspace_premium</span> WC
                     </div>` : '';
 
-                // A Imagem Central (Avatar)
                 const iconHtml = `<img src="${hero.sprite}" class="avatar-img w-16 h-16 object-contain mb-3" alt="${hero.nome}">`;
-
-                // Overlay de Bloqueio (Se Ocupado)
                 const takenOverlay = isTaken ? `<div class="absolute inset-0 bg-black/60 z-20 flex items-center justify-center"><span class="material-symbols-outlined text-error text-4xl">block</span></div>` : '';
 
                 const cardHtml = `
@@ -217,7 +203,6 @@
                 gridContainer.insertAdjacentHTML('beforeend', cardHtml);
             });
 
-            // Adiciona evento de clique apenas nas cartas disponíveis
             document.querySelectorAll('.hero-card:not(.taken)').forEach(card => {
                 card.addEventListener('click', (e) => {
                     const id = e.currentTarget.getAttribute('data-id');
@@ -230,21 +215,17 @@
         // Função de Registro no Firebase e Animação
         async function selecionar(hero, cardElement) {
             try {
-                // 1. Efeito Visual de Seleção
                 cardElement.classList.add('selected-anim');
-                document.querySelectorAll('.hero-card').forEach(c => c.style.pointerEvents = 'none'); // Trava cliques extras
+                document.querySelectorAll('.hero-card').forEach(c => c.style.pointerEvents = 'none');
 
-                // 2. Grava no Firebase (Ocupando o herói e atualizando o jogador)
                 const refConfig = doc(db, "salas", salaPIN, "configuracao", "personagens");
                 await setDoc(refConfig, { [hero.id]: nick }, { merge: true });
 
                 const refJogador = doc(db, "salas", salaPIN, "jogadores", nick);
                 await setDoc(refJogador, { sprite: hero.sprite }, { merge: true });
 
-                // 3. Salva no aparelho do aluno
                 localStorage.setItem("meuHeroi", hero.sprite);
 
-                // 4. Redireciona com um leve delay para exibir a animação
                 setTimeout(() => {
                     window.location.href = "jogo.html";
                 }, 800);
