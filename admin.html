@@ -50,7 +50,6 @@
         .char-spacing-widest { letter-spacing: 0.5em; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
         
-        /* Scrollbar customizada para as listas */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #6200ea; border-radius: 4px; }
@@ -127,7 +126,7 @@
                 </div>
             </header>
 
-            <aside class="col-span-12 lg:col-span-5 flex flex-col gap-gutter">
+            <aside class="col-span-12 lg:col-span-5 flex flex-col gap-4">
                 <div class="glass-panel p-8 rounded-xl flex flex-col gap-6 rounded-[2rem]">
                     <div class="flex items-center gap-3 mb-2">
                         <span class="material-symbols-outlined text-primary-fixed">add_task</span>
@@ -159,7 +158,19 @@
                     </div>
                 </div>
 
-                <div class="glass-panel p-6 rounded-xl rounded-[2rem] flex-grow max-h-[350px] overflow-y-auto">
+                <div class="glass-panel p-6 rounded-xl rounded-[2rem] flex flex-col gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary-fixed">upload_file</span>
+                        <h4 class="font-label-lg text-white">Importar do Excel (.CSV)</h4>
+                    </div>
+                    <p class="text-[11px] text-on-surface-variant leading-tight">Carregue sua planilha salva como formato .CSV. Colunas obrigatórias: Pergunta, OpçãoA, OpçãoB, OpçãoC, OpçãoD, RespostaCorreta (número de 0 a 3).</p>
+                    <input type="file" id="csv-file" accept=".csv" class="hidden" onchange="window.importarPlanilha(event)">
+                    <button onclick="document.getElementById('csv-file').click()" class="w-full py-3 bg-secondary-container/20 text-secondary border border-secondary-container/40 font-label-sm uppercase tracking-wider rounded-full hover:bg-secondary-container/40 transition-all btn-3d">
+                        Selecionar Planilha CSV
+                    </button>
+                </div>
+
+                <div class="glass-panel p-6 rounded-xl rounded-[2rem] flex-grow max-h-[250px] overflow-y-auto">
                     <div class="flex justify-between items-center mb-4">
                         <h4 class="font-label-lg text-white">Missões Salvas</h4>
                         <span id="contador-perguntas" class="bg-secondary-container/30 text-secondary px-3 py-1 rounded-full text-[10px] font-bold">0</span>
@@ -171,7 +182,6 @@
             </aside>
 
             <div class="col-span-12 lg:col-span-7 flex flex-col gap-gutter">
-                
                 <section class="glass-panel rounded-xl overflow-hidden rounded-[2rem]">
                     <div class="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
                         <div class="flex items-center gap-2">
@@ -212,31 +222,31 @@
                         <div class="col-span-full text-center text-on-surface-variant py-8">Nenhum guerreiro conectado. Forneça o PIN!</div>
                     </div>
                 </section>
-
             </div>
         </section>
     </main>
 
     <footer class="w-full py-6 mt-auto border-t border-white/5 flex flex-col items-center gap-4 px-margin-desktop bg-surface-container-lowest">
         <div class="text-primary-fixed font-black tracking-tighter">ARENA PRO</div>
-        <p class="font-label-sm text-label-sm text-on-surface-variant opacity-50 uppercase tracking-widest">© 2026 ARENA PRO E-SPORTS. ALL RIGHTS RESERVED.</p>
+        <p class="font-label-sm text-label-sm text-on-surface-variant opacity-50 uppercase tracking-widest">© 2024 ARENA PRO E-SPORTS. ALL RIGHTS RESERVED.</p>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, setDoc, getDocs, addDoc, collection, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
-    authDomain: "yvypoty-491e8.firebaseapp.com",
-    projectId: "yvypoty-491e8",
-    storageBucket: "yvypoty-491e8.firebasestorage.app",
-    messagingSenderId: "338156073833",
-    appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
-    measurementId: "G-W93E7TJ59V" };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
+            authDomain: "yvypoty-491e8.firebaseapp.com",
+            projectId: "yvypoty-491e8",
+            storageBucket: "yvypoty-491e8.firebasestorage.app",
+            messagingSenderId: "338156073833",
+            appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
+            measurementId: "G-W93E7TJ59V"
+        };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // VALIDAÇÃO DE LOGIN
         const profID = localStorage.getItem("profID");
         if(!profID) window.location.href = "index.html";
         document.getElementById('profID').innerText = profID;
@@ -245,11 +255,9 @@
         let jogoRodando = false;
         let editandoId = null;
 
-        // --- 1. SETUP DA SALA ---
         window.gerarSala = async () => {
             const disciplina = document.getElementById('nome-disciplina').value.trim();
             if(!disciplina) { alert("Dê um nome para a aula!"); return; }
-
             meuPIN = Math.floor(10000 + Math.random() * 90000).toString();
             
             await setDoc(doc(db, "salas", meuPIN), { disciplina: disciplina, professor: profID, criadaEm: new Date().toISOString(), encerrada: false });
@@ -257,22 +265,55 @@
 
             localStorage.setItem("salaPIN", meuPIN);
             localStorage.setItem("disciplinaAtiva", disciplina);
-
             document.getElementById('setup-phase').classList.add('hidden');
             document.getElementById('dashboard-phase').classList.remove('hidden');
-            
             document.getElementById('meuPIN').innerText = meuPIN;
             document.getElementById('session-theme').innerText = disciplina;
 
             iniciarEscutaPerguntas();
             iniciarMotorDeEstatisticas();
             iniciarEscutaJogadores();
-            
-            // Inicia o timer de inatividade apenas após a sala estar gerada
             resetarInatividade();
         }
 
-        // --- 2. CONTROLES DO HEADER ---
+        // MOTOR PARSER DO IMPORTADOR EXCEL (CSV)
+        window.importarPlanilha = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const rawText = e.target.result;
+                const lines = rawText.split("\n");
+                
+                let delimitador = ";";
+                if (lines[0] && lines[0].includes(",")) delimitador = ",";
+
+                let contador = 0;
+                for (let i = 0; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const colunas = lines[i].split(delimitador);
+                    if (colunas.length >= 6) {
+                        const enunciado = colunas[0].replace(/"/g, "").trim();
+                        const opcoes = [colunas[1].trim(), colunas[2].trim(), colunas[3].trim(), colunas[4].trim()];
+                        const correta = parseInt(colunas[5].trim());
+
+                        if (enunciado && opcoes[0] && !isNaN(correta)) {
+                            await addDoc(collection(db, "salas", meuPIN, "perguntas"), {
+                                enunciado: enunciado,
+                                opcoes: opcoes,
+                                correta: correta
+                            });
+                            contador++;
+                        }
+                    }
+                }
+                alert(`Sucesso! ${contador} missões foram importadas e carregadas automaticamente.`);
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+
         window.abrirProjecao = () => {
             const tema = document.getElementById('select-tema').value;
             localStorage.setItem("temaAtivo", tema);
@@ -282,32 +323,23 @@
         window.alternarPlay = async () => {
             jogoRodando = !jogoRodando;
             await setDoc(doc(db, "salas", meuPIN, "configuracao", "estado"), { jogando: jogoRodando }, { merge: true });
-            
             const btn = document.getElementById('playPauseToggle');
             const icon = document.getElementById('play-icon');
-            
             if (jogoRodando) {
-                btn.classList.replace('border-success', 'border-danger');
-                btn.classList.replace('text-success', 'text-danger');
-                btn.style.boxShadow = "0 0 15px rgba(239, 68, 68, 0.4)";
-                icon.innerText = 'pause';
+                btn.classList.replace('border-success', 'border-danger'); btn.classList.replace('text-success', 'text-danger');
+                btn.style.boxShadow = "0 0 15px rgba(239, 68, 68, 0.4)"; icon.innerText = 'pause';
             } else {
-                btn.classList.replace('border-danger', 'border-success');
-                btn.classList.replace('text-danger', 'text-success');
-                btn.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.4)";
-                icon.innerText = 'play_arrow';
+                btn.classList.replace('border-danger', 'border-success'); btn.classList.replace('text-danger', 'text-success');
+                btn.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.4)"; icon.innerText = 'play_arrow';
             }
         }
 
-        // --- 3. CRUD PERGUNTAS ---
         window.salvarPergunta = async () => {
             const p = document.getElementById('txt-pergunta').value;
             const opts = [document.getElementById('opt0').value, document.getElementById('opt1').value, document.getElementById('opt2').value, document.getElementById('opt3').value];
             const cor = parseInt(document.getElementById('select-correta').value);
-
-            if (!p || !opts[0] || !opts[1]) { alert("Preencha o enunciado e pelo menos as opções A e B!"); return; }
+            if (!p || !opts[0] || !opts[1]) { alert("Preencha o enunciado e as opções!"); return; }
             const dados = { enunciado: p, opcoes: opts, correta: cor };
-
             try {
                 if(editandoId) {
                     await updateDoc(doc(db, "salas", meuPIN, "perguntas", editandoId), dados);
@@ -326,9 +358,7 @@
                 const painel = document.getElementById('lista-render');
                 document.getElementById('contador-perguntas').innerText = snapshot.docs.length;
                 painel.innerHTML = "";
-                
                 if(snapshot.empty) { painel.innerHTML = "<p class='text-on-surface-variant text-sm text-center py-4'>Nenhuma missão cadastrada.</p>"; return; }
-
                 snapshot.forEach((docSnap) => {
                     const q = docSnap.data(); const id = docSnap.id;
                     const div = document.createElement('div');
@@ -346,8 +376,7 @@
         }
 
         window.editarPergunta = (id, en, o0, o1, o2, o3, cor) => {
-            editandoId = id;
-            document.getElementById('txt-pergunta').value = en;
+            editandoId = id; document.getElementById('txt-pergunta').value = en;
             document.getElementById('opt0').value = o0; document.getElementById('opt1').value = o1;
             document.getElementById('opt2').value = o2; document.getElementById('opt3').value = o3;
             document.getElementById('select-correta').value = cor;
@@ -357,29 +386,20 @@
 
         window.deletarPergunta = async (id) => { if(confirm("Deletar pergunta?")) await deleteDoc(doc(db, "salas", meuPIN, "perguntas", id)); }
 
-        // --- 4. ESTATÍSTICAS E JOGADORES ---
-        function iniciarEscutaJogadores() {
-            onSnapshot(collection(db, "salas", meuPIN, "jogadores"), (snapshot) => {
-                document.getElementById('jogadores-online').innerText = snapshot.docs.length;
-            });
-        }
+        function iniciarEscutaJogadores() { onSnapshot(collection(db, "salas", meuPIN, "jogadores"), (snapshot) => { document.getElementById('jogadores-online').innerText = snapshot.docs.length; }); }
 
         function iniciarMotorDeEstatisticas() {
             onSnapshot(collection(db, "salas", meuPIN, "respostas"), (snap) => {
                 if(snap.empty) return;
                 let statsPerguntas = {}; let statsJogadores = {};
-
                 snap.docs.forEach(docSnap => {
                     const r = docSnap.data(); 
                     if(!statsPerguntas[r.pergunta]) statsPerguntas[r.pergunta] = { certos: 0, errados: 0 };
                     if(r.acertou) statsPerguntas[r.pergunta].certos++; else statsPerguntas[r.pergunta].errados++;
-
                     if(!statsJogadores[r.nick]) statsJogadores[r.nick] = { avatar: r.personagem, certos: 0, errados: 0 };
                     if(r.acertou) statsJogadores[r.nick].certos++; else statsJogadores[r.nick].errados++;
                 });
-
-                renderizarPerguntasStats(statsPerguntas);
-                renderizarJogadoresDossie(statsJogadores);
+                renderizarPerguntasStats(statsPerguntas); renderizarJogadoresDossie(statsJogadores);
             });
         }
 
@@ -390,21 +410,12 @@
                 let taxa = Math.round((perguntas[p].certos / total) * 100) || 0;
                 let barColor = taxa >= 70 ? 'bg-success' : (taxa >= 40 ? 'bg-primary-fixed' : 'bg-danger');
                 let textColor = taxa >= 70 ? 'text-success' : (taxa >= 40 ? 'text-primary-fixed' : 'text-danger');
-
                 html += `
                     <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <td class="px-6 py-4">
-                            <span class="font-mono text-sm text-primary-fixed block mb-1">Q${i.toString().padStart(2, '0')}</span>
-                            <span class="text-xs text-on-surface-variant line-clamp-1" title="${p}">${p}</span>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="w-32 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                <div class="h-full ${barColor}" style="width: ${taxa}%"></div>
-                            </div>
-                        </td>
+                        <td class="px-6 py-4"><span class="font-mono text-sm text-primary-fixed block mb-1">Q${i.toString().padStart(2, '0')}</span><span class="text-xs text-on-surface-variant line-clamp-1" title="${p}">${p}</span></td>
+                        <td class="px-6 py-4"><div class="w-32 h-1.5 bg-white/10 rounded-full overflow-hidden"><div class="h-full ${barColor}" style="width: ${taxa}%"></div></div></td>
                         <td class="px-6 py-4 ${textColor} font-bold text-right">${taxa}%</td>
-                    </tr>
-                `;
+                    </tr>`;
                 i++;
             }
             document.getElementById('questions-stats').innerHTML = html;
@@ -417,50 +428,24 @@
                 let taxa = Math.round((jogadores[j].certos / Math.max(total, 1)) * 100);
                 let corBorda = taxa >= 70 ? 'border-success' : (taxa >= 40 ? 'border-outline' : 'border-danger');
                 let corTexto = taxa >= 70 ? 'text-success' : (taxa >= 40 ? 'text-primary-fixed' : 'text-danger');
-                
-                let avatarHtml = jogadores[j].avatar.includes('/') || jogadores[j].avatar.includes('http') 
-                    ? `<img class="w-full h-full object-cover" src="${jogadores[j].avatar}">` 
-                    : `<span class="text-3xl">${jogadores[j].avatar}</span>`;
-
+                let avatarHtml = jogadores[j].avatar.includes('/') || jogadores[j].avatar.includes('http') ? `<img class="w-full h-full object-cover" src="${jogadores[j].avatar}">` : `<span class="text-3xl">${jogadores[j].avatar}</span>`;
                 html += `
                     <div class="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/10 hover:border-primary-container/50 transition-all cursor-pointer group rounded-xl">
-                        <div class="relative">
-                            <div class="w-12 h-12 rounded-full overflow-hidden border-2 ${corBorda} flex items-center justify-center bg-black/50">
-                                ${avatarHtml}
-                            </div>
-                        </div>
-                        <div class="flex-grow">
-                            <div class="flex justify-between items-start">
-                                <p class="font-label-lg text-white group-hover:text-primary-fixed transition-colors truncate max-w-[120px]">${j}</p>
-                                <span class="font-mono text-xs text-primary-fixed">${jogadores[j].certos} pts</span>
-                            </div>
-                            <p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Taxa de Acerto: <span class="${corTexto} font-bold">${taxa}%</span></p>
-                        </div>
-                    </div>
-                `;
+                        <div class="relative"><div class="w-12 h-12 rounded-full overflow-hidden border-2 ${corBorda} flex items-center justify-center bg-black/50">${avatarHtml}</div></div>
+                        <div class="flex-grow"><div class="flex justify-between items-start"><p class="font-label-lg text-white group-hover:text-primary-fixed transition-colors truncate max-w-[120px]">${j}</p><span class="font-mono text-xs text-primary-fixed">${jogadores[j].certos} pts</span></div><p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Taxa de Acerto: <span class="${corTexto} font-bold">${taxa}%</span></p></div>
+                    </div>`;
             }
             document.getElementById('character-list').innerHTML = html || `<div class="col-span-full text-center text-on-surface-variant py-8">Nenhuma resposta registrada ainda.</div>`;
         }
 
-        // --- 5. CONTROLE DE SESSÃO E INATIVIDADE ---
         window.encerrarAula = async () => {
             if(confirm("Deseja realmente ENCERRAR a aula? O placar sumirá e os alunos serão desconectados da sala.")) {
-                if (meuPIN) {
-                    // Atualiza a flag "encerrada" na sala
-                    await setDoc(doc(db, "salas", meuPIN), { encerrada: true }, { merge: true });
-                }
-                
-                // Limpa o local storage
-                localStorage.removeItem("profID");
-                localStorage.removeItem("salaPIN");
-                localStorage.removeItem("disciplinaAtiva");
-                
-                // Redireciona
+                if (meuPIN) await setDoc(doc(db, "salas", meuPIN), { encerrada: true }, { merge: true });
+                localStorage.removeItem("profID"); localStorage.removeItem("salaPIN"); localStorage.removeItem("disciplinaAtiva");
                 window.location.href = "index.html";
             }
         }
 
-        // Função que encerra a sessão por inatividade (30 minutos)
         let inatividadeTimer;
         function resetarInatividade() {
             clearTimeout(inatividadeTimer);
@@ -468,18 +453,13 @@
                 if(meuPIN) {
                     alert("A sessão foi encerrada por 30 minutos de inatividade.");
                     setDoc(doc(db, "salas", meuPIN), { encerrada: true }, { merge: true }).then(() => {
-                        localStorage.removeItem("salaPIN");
-                        localStorage.removeItem("disciplinaAtiva");
+                        localStorage.removeItem("salaPIN"); localStorage.removeItem("disciplinaAtiva");
                         window.location.href = "index.html";
                     });
                 }
-            }, 30 * 60 * 1000); // 30 minutos
+            }, 30 * 60 * 1000);
         }
-
-        // Inicia o timer e reseta com qualquer atividade
-        window.onload = resetarInatividade;
-        document.onmousemove = resetarInatividade;
-        document.onkeypress = resetarInatividade;
+        window.onload = resetarInatividade; document.onmousemove = resetarInatividade; document.onkeypress = resetarInatividade;
     </script>
 </body>
 </html>
