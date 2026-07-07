@@ -1,28 +1,125 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html class="dark" lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escolha seu Herói</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ARENA PRO - Hero Selection</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-lowest": "#0e0e10", "on-tertiary-fixed": "#260058", "secondary-container": "#6200ea",
+                        "on-tertiary-fixed-variant": "#582a9f", "surface-bright": "#39393b", "on-secondary": "#3a0092",
+                        "tertiary-container": "#e4d2ff", "surface-container-low": "#1c1b1d", "on-secondary-container": "#cfbcff",
+                        "primary-fixed": "#ffe16d", "on-tertiary-container": "#7146b9", "primary": "#fff6df",
+                        "on-surface": "#e5e1e4", "on-primary-fixed-variant": "#544600", "tertiary-fixed": "#ebdcff",
+                        "on-tertiary": "#400688", "outline": "#999077", "surface-container-highest": "#353437",
+                        "on-secondary-fixed-variant": "#5400cc", "primary-fixed-dim": "#e9c400", "outline-variant": "#4d4732",
+                        "tertiary-fixed-dim": "#d4bbff", "primary-container": "#ffd700", "inverse-primary": "#705d00",
+                        "surface": "#131315", "error": "#ffb4ab", "error-container": "#93000a", "on-primary": "#3a3000",
+                        "on-error": "#690005", "inverse-on-surface": "#313032", "secondary-fixed": "#e9ddff",
+                        "secondary": "#cfbcff", "on-secondary-fixed": "#22005d", "on-background": "#e5e1e4",
+                        "on-primary-container": "#705e00", "inverse-surface": "#e5e1e4", "surface-tint": "#e9c400",
+                        "secondary-fixed-dim": "#cfbcff", "on-surface-variant": "#d0c6ab", "background": "#131315",
+                        "on-primary-fixed": "#221b00", "tertiary": "#fcf3ff", "on-error-container": "#ffdad6",
+                        "surface-container": "#201f21", "surface-container-high": "#2a2a2c", "surface-variant": "#353437",
+                        "surface-dim": "#131315"
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    spacing: { "gutter": "24px", "unit": "8px", "margin-mobile": "20px", "container-max": "1440px", "margin-desktop": "64px" },
+                    fontFamily: { "body-lg": ["Sora"], "label-lg": ["Sora"], "headline-md": ["Sora"], "body-md": ["Sora"], "label-sm": ["Sora"], "headline-lg": ["Sora"], "display-lg": ["Sora"], "display-lg-mobile": ["Sora"] },
+                    fontSize: {
+                        "body-lg": ["18px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "display-lg-mobile": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }]
+                    }
+                }
+            }
+        };
+    </script>
     <style>
-        body { background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; max-width: 800px; margin: 0 auto; margin-top: 30px; }
-        .hero-card { background: #1e1e1e; padding: 15px; border-radius: 15px; border: 2px solid #333; cursor: pointer; transition: 0.3s; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .hero-card:hover:not(.taken) { border-color: #6200ea; transform: scale(1.05); }
-        .hero-card.taken { opacity: 0.3; cursor: not-allowed; border-color: #cf6679; }
-        .hero-card.taken::after { content: "OCUPADO"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #cf6679; font-weight: bold; background: rgba(0,0,0,0.8); padding: 5px; border-radius: 5px; font-size: 12px;}
-        .avatar { font-size: 40px; margin-bottom: 5px; }
-        .nome-heroi { font-size: 14px; font-weight: bold; }
+        body { background-color: #0a0a0c; color: #e5e1e4; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .gold-glow { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+        .hero-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .hero-card:hover:not(.taken) { transform: translateY(-4px) scale(1.02); border-color: #6200ea; box-shadow: inset 0 0 20px rgba(98, 0, 234, 0.2); }
+        .hero-card.world-cup { border-color: #ffd700; }
+        .hero-card.world-cup:hover:not(.taken) { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), inset 0 0 10px rgba(255, 215, 0, 0.3); border-color: #ffe16d; }
+        
+        .hero-card.taken { opacity: 0.4; filter: grayscale(100%); cursor: not-allowed; transform: scale(0.95); }
+        .hero-card.selected-anim { animation: selectPulse 0.5s ease-out forwards; }
+        @keyframes selectPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); background: rgba(255,215,0,0.2); }
+            100% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+        }
+        
+        .entry-anim { opacity: 0; transform: translateY(20px); animation: slideUp 0.6s ease-out forwards; }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .grid-item-1 { animation-delay: 0.05s; } .grid-item-2 { animation-delay: 0.1s; }
+        .grid-item-3 { animation-delay: 0.15s; } .grid-item-4 { animation-delay: 0.2s; }
+        .grid-item-5 { animation-delay: 0.25s; } .grid-item-6 { animation-delay: 0.3s; }
+        .grid-item-7 { animation-delay: 0.35s; } .grid-item-8 { animation-delay: 0.4s; }
+
+        /* Estilo da Imagem do Avatar */
+        .avatar-img { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); transition: transform 0.3s; }
+        .hero-card:hover:not(.taken) .avatar-img { transform: scale(1.15) translateY(-5px); }
     </style>
 </head>
-<body>
-    <h2>ESCOLHA SEU GUERREIRO</h2>
-    <h4 id="sala-info" style="color:#add8e6; margin-top:-10px;"></h4>
-    
-    <div class="grid" id="hero-grid"></div>
+<body class="min-h-screen flex flex-col font-body-md overflow-x-hidden">
+
+    <header class="w-full top-0 left-0 fixed backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-gutter py-4 z-50 bg-transparent">
+        <div class="flex items-center gap-4">
+            <span class="font-headline-lg text-headline-lg uppercase tracking-tighter text-primary-fixed">ARENA PRO</span>
+            <span class="text-surface-variant hidden md:inline">|</span>
+            <span class="font-label-lg text-label-lg text-on-surface-variant hidden md:inline tracking-widest">SELEÇÃO DE HERÓIS</span>
+        </div>
+        <div class="flex items-center gap-6 glass-panel rounded-full px-6 py-2">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary-fixed text-sm">vpn_key</span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant hidden md:inline">PIN DA SALA:</span>
+                <span class="font-label-lg text-label-lg text-white" id="display-pin">----</span>
+            </div>
+            <div class="w-px h-4 bg-white/20"></div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary text-sm">sports_esports</span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant hidden md:inline">Guerreiro:</span>
+                <span class="font-label-lg text-label-lg text-secondary-fixed" id="display-nick">Visitante</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow pt-[104px] pb-margin-desktop px-gutter max-w-container-max mx-auto w-full flex flex-col items-center">
+        <div class="text-center mb-12 entry-anim">
+            <h1 class="font-display-lg-mobile md:font-display-lg text-white mb-4 shadow-black drop-shadow-lg">
+                CHOOSE YOUR <span class="text-primary-container">CHAMPION</span>
+            </h1>
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
+                Selecione seu herói para a batalha. Avatares com o selo "World Cup" garantem destaque visual épico na arena de combate.
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 w-full" id="hero-grid">
+            </div>
+    </main>
+
+    <footer class="w-full py-6 mt-auto bg-surface-container-lowest border-t border-white/5 flex flex-col items-center gap-4 px-margin-desktop z-10 relative">
+        <div class="font-headline-md text-headline-md text-primary-fixed font-black">ARENA PRO</div>
+        <div class="font-label-sm text-label-sm text-secondary">© 2026 ARENA PRO E-SPORTS. ALL RIGHTS RESERVED.</div>
+    </footer>
 
     <script type="module">
-        // ATENÇÃO: Importamos o setDoc no lugar do updateDoc
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -36,56 +133,113 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Puxa as variáveis de Login
+        const nick = localStorage.getItem("usuarioAtivo");
+        const salaPIN = localStorage.getItem("salaPIN");
+
+        if(!nick || !salaPIN) { window.location.href = "index.html"; }
+
+        document.getElementById('display-pin').innerText = salaPIN;
+        document.getElementById('display-nick').innerText = nick;
+
+        // SEUS PERSONAGENS COM IMAGENS REAIS
         const herois = [
-            { id: 'mago', nome: 'Mago', sprite: '🧙‍♂️' }, { id: 'elfa', nome: 'Elfa', sprite: '🧝‍♀️' },
-            { id: 'guerreiro', nome: 'Guerreiro', sprite: '🦸‍♂️' }, { id: 'ninja', nome: 'Ninja', sprite: '🥷' },
-            { id: 'robo', nome: 'Ciborgue', sprite: '🤖' }, { id: 'vampiro', nome: 'Vampiro', sprite: '🧛‍♂️' },
-            { id: 'zumbi', nome: 'Zumbi', sprite: '🧟‍♂️' }, { id: 'fada', nome: 'Fada', sprite: '🧚‍♀️' },
-            { id: 'sereia', nome: 'Sereia', sprite: '🧜‍♀️' }, { id: 'genio', nome: 'Gênio', sprite: '🧞‍♂️' },
-            { id: 'astronauta', nome: 'Astronauta', sprite: '🧑‍🚀' }, { id: 'detetive', nome: 'Detetive', sprite: '🕵️' },
-            { id: 'pirata', nome: 'Pirata', sprite: '🏴‍☠️' }, { id: 'rei', nome: 'Rei', sprite: '🤴' },
-            { id: 'rainha', nome: 'Rainha', sprite: '👸' }, { id: 'heroina', nome: 'Heroína', sprite: '🦸‍♀️' },
-            { id: 'alien', nome: 'Alien', sprite: '👽' }, { id: 'fantasma', nome: 'Fantasma', sprite: '👻' },
-            { id: 'palhaco', nome: 'Palhaço', sprite: '🤡' }, { id: 'ogro', nome: 'Ogro', sprite: '👹' }
+            { id: "mago", nome: "Mago", sprite: "img/mago.png", tier: "world-cup" },
+            { id: "elfa", nome: "Elfa", sprite: "img/elfa.png", tier: "standard" },
+            { id: "guerreiro", nome: "Guerreiro", sprite: "img/guerreiro.png", tier: "world-cup" },
+            { id: "ninja", nome: "Ninja", sprite: "img/ninja.png", tier: "standard" },
+            { id: "robo", nome: "Ciborgue", sprite: "img/robo.png", tier: "standard" },
+            { id: "vampiro", nome: "Vampiro", sprite: "img/vampiro.png", tier: "standard" },
+            { id: "fada", nome: "Fada", sprite: "img/fada.png", tier: "standard" },
+            { id: "pirata", nome: "Pirata", sprite: "img/pirata.png", tier: "world-cup" },
+            { id: "samurai", nome: "Samurai", sprite: "img/samurai.png", tier: "standard" },
+            { id: "hacker", nome: "Hacker", sprite: "img/hacker.png", tier: "standard" }
+            // Adicione quantos quiser aqui...
         ];
 
-        const grid = document.getElementById('hero-grid');
-        const nick = localStorage.getItem("usuarioAtivo");
-        const disciplina = localStorage.getItem("disciplinaAtiva");
+        const gridContainer = document.getElementById('hero-grid');
 
-        if(!nick || !disciplina) { alert("Erro de Login!"); window.location.href = "index.html"; }
-        
-        document.getElementById('sala-info').innerText = `Sala: ${disciplina.toUpperCase()}`;
-
-        onSnapshot(doc(db, "salas", disciplina, "configuracao", "personagens"), (snap) => {
+        // Escuta a seleção em Tempo Real da Sala Específica (PIN)
+        onSnapshot(doc(db, "salas", salaPIN, "configuracao", "personagens"), (snap) => {
             const ocupados = snap.data() || {};
-            grid.innerHTML = "";
+            gridContainer.innerHTML = '';
 
-            herois.forEach(hero => {
+            herois.forEach((hero, index) => {
                 const isTaken = ocupados[hero.id] && ocupados[hero.id] !== nick;
-                const div = document.createElement('div');
-                div.className = `hero-card ${isTaken ? 'taken' : ''}`;
-                div.innerHTML = `<div class="avatar">${hero.sprite}</div><div class="nome-heroi">${hero.nome}</div>`;
-                
-                if (!isTaken) div.onclick = () => selecionar(hero);
-                grid.appendChild(div);
+                const isWorldCup = hero.tier === "world-cup";
+                const typeLabel = isWorldCup ? "World Cup" : "Standard";
+
+                const cardClasses = `
+                    hero-card glass-panel rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden group
+                    ${isWorldCup ? 'world-cup' : ''} 
+                    ${isTaken ? 'taken' : ''}
+                    entry-anim grid-item-${(index % 8) + 1}
+                `;
+
+                // Tag Dourada para personagens Épicos
+                const badgeHtml = isWorldCup ? 
+                    `<div class="absolute top-2 right-2 bg-primary-container text-on-primary-container font-label-sm text-[10px] px-2 py-1 rounded-full uppercase tracking-wider font-bold shadow-lg z-10 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[12px]">workspace_premium</span> WC
+                    </div>` : '';
+
+                // A Imagem Central (Avatar)
+                const iconHtml = `<img src="${hero.sprite}" class="avatar-img w-16 h-16 object-contain mb-3" alt="${hero.nome}">`;
+
+                // Overlay de Bloqueio (Se Ocupado)
+                const takenOverlay = isTaken ? `<div class="absolute inset-0 bg-black/60 z-20 flex items-center justify-center"><span class="material-symbols-outlined text-error text-4xl">block</span></div>` : '';
+
+                const cardHtml = `
+                    <div class="${cardClasses}" data-id="${hero.id}">
+                        ${badgeHtml}
+                        <div class="absolute inset-0 bg-gradient-to-b ${isWorldCup ? 'from-primary-container/10' : 'from-secondary-container/10'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="relative z-10 flex flex-col items-center w-full">
+                            ${iconHtml}
+                            <h3 class="font-label-lg text-label-lg text-white text-center mb-1 group-hover:text-primary transition-colors truncate w-full">${hero.nome}</h3>
+                            <span class="font-label-sm text-[10px] uppercase text-on-surface-variant">${typeLabel}</span>
+                        </div>
+                        ${takenOverlay}
+                    </div>
+                `;
+                gridContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+
+            // Adiciona evento de clique apenas nas cartas disponíveis
+            document.querySelectorAll('.hero-card:not(.taken)').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const id = e.currentTarget.getAttribute('data-id');
+                    const hero = herois.find(h => h.id === id);
+                    selecionar(hero, e.currentTarget);
+                });
             });
         });
 
-        async function selecionar(hero) {
+        // Função de Registro no Firebase e Animação
+        async function selecionar(hero, cardElement) {
             try {
-                // A MÁGICA ESTÁ AQUI: setDoc com { merge: true } resolve o erro!
-                const refConfig = doc(db, "salas", disciplina, "configuracao", "personagens");
+                // 1. Efeito Visual de Seleção
+                cardElement.classList.add('selected-anim');
+                document.querySelectorAll('.hero-card').forEach(c => c.style.pointerEvents = 'none'); // Trava cliques extras
+
+                // 2. Grava no Firebase (Ocupando o herói e atualizando o jogador)
+                const refConfig = doc(db, "salas", salaPIN, "configuracao", "personagens");
                 await setDoc(refConfig, { [hero.id]: nick }, { merge: true });
-                
-                const refJogador = doc(db, "salas", disciplina, "jogadores", nick);
+
+                const refJogador = doc(db, "salas", salaPIN, "jogadores", nick);
                 await setDoc(refJogador, { sprite: hero.sprite }, { merge: true });
-                
+
+                // 3. Salva no aparelho do aluno
                 localStorage.setItem("meuHeroi", hero.sprite);
-                window.location.href = "jogo.html";
-            } catch (erro) {
-                console.error("Erro ao selecionar personagem:", erro);
-                alert("Ocorreu um erro de conexão. Tente novamente!");
+
+                // 4. Redireciona com um leve delay para exibir a animação
+                setTimeout(() => {
+                    window.location.href = "jogo.html";
+                }, 800);
+
+            } catch (error) {
+                console.error(error);
+                alert("Erro de conexão ao escolher personagem.");
+                document.querySelectorAll('.hero-card').forEach(c => c.style.pointerEvents = 'auto');
+                cardElement.classList.remove('selected-anim');
             }
         }
     </script>
