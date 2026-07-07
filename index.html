@@ -1,57 +1,147 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html class="dark" lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena RPG - Entrada</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ARENA PRO - Entrada</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100;400;600;700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#201f21", "secondary": "#cfbcff", "primary-container": "#ffd700",
+                        "surface-variant": "#353437", "error-container": "#93000a", "tertiary": "#fcf3ff",
+                        "secondary-fixed": "#e9ddff", "on-secondary-fixed": "#22005d", "surface-container-lowest": "#0e0e10",
+                        "on-tertiary-fixed-variant": "#582a9f", "on-tertiary-container": "#7146b9", "on-primary-fixed-variant": "#544600",
+                        "outline-variant": "#4d4732", "primary-fixed": "#ffe16d", "surface-container-low": "#1c1b1d",
+                        "on-primary-container": "#705e00", "on-background": "#e5e1e4", "secondary-container": "#6200ea",
+                        "surface-dim": "#131315", "inverse-surface": "#e5e1e4", "tertiary-container": "#e4d2ff",
+                        "on-secondary": "#3a0092", "error": "#ffb4ab", "surface-tint": "#e9c400",
+                        "inverse-primary": "#705d00", "tertiary-fixed": "#ebdcff", "surface-container-highest": "#353437",
+                        "surface-container-high": "#2a2a2c", "inverse-on-surface": "#313032", "on-error": "#690005",
+                        "on-primary-fixed": "#221b00", "tertiary-fixed-dim": "#d4bbff", "outline": "#999077",
+                        "on-error-container": "#ffdad6", "on-tertiary": "#400688", "primary": "#fff6df",
+                        "on-surface": "#e5e1e4", "on-tertiary-fixed": "#260058", "secondary-fixed-dim": "#cfbcff",
+                        "surface-bright": "#39393b", "on-surface-variant": "#d0c6ab", "on-secondary-container": "#cfbcff",
+                        "on-secondary-fixed-variant": "#5400cc", "on-primary": "#3a3000", "background": "#131315",
+                        "primary-fixed-dim": "#e9c400", "surface": "#131315"
+                    },
+                    "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    "fontFamily": { "body-lg": ["Sora"], "headline-md": ["Sora"], "display-lg": ["Sora"], "headline-lg": ["Sora"], "body-md": ["Sora"], "label-lg": ["Sora"], "label-sm": ["Sora"] }
+                }
+            }
+        }
+    </script>
     <style>
-        body { background: #0f0f1a; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #1c1c2d; padding: 30px; border-radius: 20px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid #8e44ad; }
-        .botoes-iniciais button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; border: none; transition: 0.3s; }
-        .btn-aluno { background: #3498db; color: white; } .btn-aluno:hover { background: #2980b9; transform: scale(1.05); }
-        .btn-prof { background: #e74c3c; color: white; } .btn-prof:hover { background: #c0392b; transform: scale(1.05); }
+        body { background-color: #0a0a0c; margin: 0; overflow: hidden; font-family: 'Sora', sans-serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .gold-btn { background-color: #ffd700; color: #000; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+        .gold-btn:hover { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); transform: translateY(-2px); }
+        .gold-btn::after { content: ''; position: absolute; inset: -4px; border: 1px solid #ffd700; opacity: 0; transition: opacity 0.3s; }
+        .gold-btn:hover::after { opacity: 1; }
+        .stylized-input { background: rgba(0, 0, 0, 0.4); border: none; border-bottom: 2px solid #6200ea; transition: all 0.3s ease; }
+        .stylized-input:focus { outline: none; border-bottom-color: #ffd700; box-shadow: 0 4px 12px -2px rgba(98, 0, 234, 0.5); background: rgba(0, 0, 0, 0.6); }
         
-        .form-area { display: none; margin-top: 20px; }
-        input, select { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; background: #2a2a40; color: white; text-align: center; font-size: 16px; }
-        .btn-entrar { width: 100%; padding: 15px; background: #8e44ad; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .btn-voltar { background: transparent; color: #aaa; border: none; margin-top: 15px; cursor: pointer; text-decoration: underline; }
+        .loading-spinner { border: 3px solid rgba(255, 215, 0, 0.1); border-top: 3px solid #ffd700; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
     </style>
 </head>
-<body>
-    <div class="card">
-        <h2 id="titulo-principal">🏰 Bem-vindo à Arena</h2>
-        
-        <div id="escolha-papel" class="botoes-iniciais">
-            <button class="btn-aluno" onclick="mostrarForm('aluno')">👨‍🎓 ENTRAR COMO ALUNO</button>
-            <button class="btn-prof" onclick="mostrarForm('prof')">👨‍🏫 ENTRAR COMO PROFESSOR</button>
-        </div>
+<body class="flex items-center justify-center min-h-screen">
 
-        <div id="form-aluno" class="form-area">
-            <input type="text" id="nome-aluno" placeholder="Digite seu Nickname">
-            <select id="disciplina-aluno">
-                <option value="" disabled selected>Escolha a Disciplina...</option>
-                <option value="matematica">Matemática</option> <option value="portugues">Português</option>
-                <option value="biologia">Biologia</option> <option value="historia">História</option>
-            </select>
-            <button class="btn-entrar" id="btn-login-aluno">JOGAR</button>
-            <button class="btn-voltar" onclick="voltar()">Voltar</button>
-        </div>
+    <div class="fixed inset-0 w-full h-full z-0" style="display:block;">
+        <canvas id="shader-canvas-ANIMATION_7" style="display:block;width:100%;height:100%" width="1280" height="1024"></canvas>
+        <script>
+        (function() {
+          const canvas = document.getElementById('shader-canvas-ANIMATION_7');
+          function syncSize() {
+            const w = canvas.clientWidth  || 1280;
+            const h = canvas.clientHeight || 720;
+            if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+          }
+          if (typeof ResizeObserver !== 'undefined') { new ResizeObserver(syncSize).observe(canvas); }
+          syncSize();
 
-        <div id="form-prof" class="form-area">
-            <select id="disciplina-prof">
-                <option value="" disabled selected>Sua Disciplina...</option>
-                <option value="matematica">Matemática</option> <option value="portugues">Português</option>
-                <option value="biologia">Biologia</option> <option value="historia">História</option>
-            </select>
-            <input type="password" id="senha-prof" placeholder="Senha (1234)">
-            <button class="btn-entrar" id="btn-login-prof">ACESSAR PAINEL</button>
-            <button class="btn-voltar" onclick="voltar()">Voltar</button>
-        </div>
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (!gl) return;
+          const vs = `attribute vec2 a_position; varying vec2 v_texCoord; void main() { v_texCoord = a_position * 0.5 + 0.5; gl_Position = vec4(a_position, 0.0, 1.0); }`;
+          const fs = `precision highp float; varying vec2 v_texCoord; uniform float u_time;
+          void main() {
+              vec2 uv = v_texCoord;
+              vec3 color = vec3(0.05, 0.05, 0.08);
+              float grid = sin(uv.x * 40.0 + u_time * 0.5) * sin(uv.y * 40.0 + u_time * 0.5);
+              grid = smoothstep(0.98, 1.0, grid); color += grid * vec3(0.38, 0.0, 0.92) * 0.3;
+              float wave = sin(uv.x * 5.0 + u_time * 0.8) * 0.5 + 0.5;
+              float wave2 = cos(uv.y * 3.0 - u_time * 0.4) * 0.5 + 0.5;
+              color += (wave * wave2) * vec3(0.1, 0.0, 0.2);
+              float scanline = sin(uv.y * 800.0) * 0.04; color -= scanline;
+              gl_FragColor = vec4(color, 1.0);
+          }`;
+          function cs(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
+          const prog = gl.createProgram(); gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(prog); gl.useProgram(prog);
+          const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+          const pos = gl.getAttribLocation(prog, 'a_position'); gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+          const uTime = gl.getUniformLocation(prog, 'u_time');
+          function render(t) {
+            if (typeof ResizeObserver === 'undefined') syncSize();
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            if (uTime) gl.uniform1f(uTime, t * 0.001);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); requestAnimationFrame(render);
+          }
+          render(0);
+        })();
+        </script>
     </div>
+
+    <main class="relative z-10 w-full max-w-md px-6">
+        
+        <div class="glass-card p-10 rounded-xl shadow-2xl flex flex-col gap-8 items-center text-center" id="box-entrada">
+            <header>
+                <h1 class="font-headline-lg text-headline-lg uppercase tracking-tighter text-primary-container font-extrabold">ARENA PRO</h1>
+                <p class="font-body-md text-on-surface-variant mt-2">Insira o PIN do jogo ou ID de Acesso</p>
+            </header>
+            <div class="w-full space-y-6">
+                <div class="relative">
+                    <input class="stylized-input w-full h-16 text-center text-2xl font-bold tracking-widest text-primary-fixed uppercase px-4 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]" id="codigo-input" placeholder="DIGITE O CÓDIGO" type="text" autocomplete="off">
+                </div>
+                <button class="gold-btn w-full h-16 font-label-lg text-label-lg font-black tracking-widest flex items-center justify-center gap-3 rounded-xl shadow-[0_6px_0_#b29600] active:translate-y-[2px] active:shadow-[0_4px_0_#b29600]" id="btn-verificar" onclick="window.verificarCodigo()">
+                    AVANÇAR
+                    <span class="hidden loading-spinner" id="loading"></span>
+                </button>
+            </div>
+            <footer class="mt-4">
+                <p class="text-[10px] text-on-surface-variant/40 uppercase tracking-widest font-bold">Acesso Exclusivo para Atletas de Elite</p>
+            </footer>
+        </div>
+
+        <div class="hidden glass-card p-10 rounded-xl shadow-2xl flex flex-col gap-8 items-center text-center" id="box-aluno">
+            <header>
+                <div class="w-16 h-16 bg-secondary-container/20 rounded-full flex items-center justify-center mb-4 mx-auto border border-secondary-container/30">
+                    <span class="material-symbols-outlined text-primary-container text-4xl">sports_esports</span>
+                </div>
+                <h1 class="font-headline-lg text-headline-lg uppercase tracking-tighter text-primary-container font-extrabold">PIN ACEITO! 🎉</h1>
+                <p class="font-body-md text-on-surface-variant mt-2">Escolha seu Codinome de Combate</p>
+            </header>
+            <div class="w-full space-y-4">
+                <input class="stylized-input w-full h-16 text-center text-2xl font-bold tracking-widest text-primary-fixed uppercase px-4 rounded-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]" id="nick-input" placeholder="SEU NICKNAME" type="text" autocomplete="off">
+                <button class="gold-btn w-full h-16 font-label-lg text-label-lg font-black tracking-widest rounded-xl shadow-[0_6px_0_#b29600] active:translate-y-[2px] active:shadow-[0_4px_0_#b29600]" onclick="window.entrarComoAluno()">
+                    ENTRAR NO JOGO
+                </button>
+                <button class="text-on-surface-variant font-label-sm hover:text-white transition-colors uppercase tracking-widest mt-4" onclick="window.voltar()">
+                    Voltar
+                </button>
+            </div>
+        </div>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
     authDomain: "yvypoty-491e8.firebaseapp.com",
@@ -59,44 +149,102 @@
     storageBucket: "yvypoty-491e8.firebasestorage.app",
     messagingSenderId: "338156073833",
     appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
-    measurementId: "G-W93E7TJ59V"};
+    measurementId: "G-W93E7TJ59V"
+        };
+        
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.mostrarForm = (tipo) => {
-            document.getElementById('escolha-papel').style.display = 'none';
-            if(tipo === 'aluno') { document.getElementById('form-aluno').style.display = 'block'; document.getElementById('titulo-principal').innerText = "Área do Aluno"; }
-            else { document.getElementById('form-prof').style.display = 'block'; document.getElementById('titulo-principal').innerText = "Área do Professor"; }
-        }
+        // LISTA DOS IDs DOS PROFESSORES
+        const IDs_PROFESSORES = [
+            "PROF01", "PROF02", "PROF03", "PROF04", "PROF05",
+            "PROF06", "PROF07", "PROF08", "PROF09", "PROF10",
+            "PROF11", "PROF12", "PROF13", "PROF14", "PROF15",
+            "ADMIN"
+        ];
 
-        window.voltar = () => {
-            document.getElementById('form-aluno').style.display = 'none';
-            document.getElementById('form-prof').style.display = 'none';
-            document.getElementById('escolha-papel').style.display = 'block';
-            document.getElementById('titulo-principal').innerText = "🏰 Bem-vindo à Arena";
-        }
+        let pinConfirmado = "";
 
-        // LOGIN ALUNO
-        document.getElementById('btn-login-aluno').onclick = async () => {
-            const nick = document.getElementById('nome-aluno').value.trim();
-            const disciplina = document.getElementById('disciplina-aluno').value;
-            if (nick && disciplina) {
-                await setDoc(doc(db, "salas", disciplina, "jogadores", nick), { acertos: 0, sprite: "⏳" }, { merge: true });
+        // 1. VERIFICAÇÃO DO PIN OU ID
+        window.verificarCodigo = async () => {
+            const input = document.getElementById('codigo-input');
+            const codigo = input.value.trim().toUpperCase();
+            const btn = document.getElementById('btn-verificar');
+            const loading = document.getElementById('loading');
+
+            if (!codigo) return;
+
+            // Efeito visual de loading no botão do seu design
+            loading.classList.remove('hidden');
+            btn.disabled = true;
+
+            // É professor?
+            if (IDs_PROFESSORES.includes(codigo)) {
+                localStorage.setItem("profID", codigo);
+                window.location.href = "admin.html";
+                return;
+            }
+
+            // É aluno validando PIN?
+            try {
+                const docRef = doc(db, "salas", codigo);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    pinConfirmado = codigo;
+                    // Alterna as telas usando as classes do Tailwind
+                    document.getElementById('box-entrada').classList.add('hidden');
+                    document.getElementById('box-aluno').classList.remove('hidden');
+                } else {
+                    alert("❌ PIN inválido ou Sala não encontrada!");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Erro de conexão!");
+            } finally {
+                // Restaura o botão
+                loading.classList.add('hidden');
+                btn.disabled = false;
+            }
+        };
+
+        // 2. REGISTRO DO ALUNO E REDIRECIONAMENTO
+        window.entrarComoAluno = async () => {
+            const nick = document.getElementById('nick-input').value.trim().toUpperCase();
+            if(!nick) { alert("Digite um nome!"); return; }
+
+            try {
+                // Salva o aluno no Firebase
+                await setDoc(doc(db, "salas", pinConfirmado, "jogadores", nick), { acertos: 0, sprite: "⏳" }, { merge: true });
+                
+                // Salva os dados no celular
                 localStorage.setItem("usuarioAtivo", nick);
-                localStorage.setItem("disciplinaAtiva", disciplina);
+                localStorage.setItem("salaPIN", pinConfirmado);
+                
                 window.location.href = "selecao.html";
-            } else { alert("Preencha o nome e a disciplina!"); }
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao entrar na sala. Tente novamente.");
+            }
         };
 
-        // LOGIN PROFESSOR
-        document.getElementById('btn-login-prof').onclick = () => {
-            const disciplina = document.getElementById('disciplina-prof').value;
-            const senha = document.getElementById('senha-prof').value;
-            if (disciplina && senha === "1234") {
-                localStorage.setItem("disciplinaAtiva", disciplina); // Salva para o admin saber a sala
-                window.location.href = "admin.html"; // Vai pro Painel Central
-            } else { alert("Senha ou Disciplina incorreta!"); }
+        // 3. BOTÃO VOLTAR
+        window.voltar = () => {
+            document.getElementById('box-aluno').classList.add('hidden');
+            document.getElementById('box-entrada').classList.remove('hidden');
         };
+
+        // MICRO-INTERAÇÕES DO SEU DESIGN (Animação ao clicar no input)
+        const inputs = document.querySelectorAll('.stylized-input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('scale-[1.02]');
+                input.parentElement.style.transition = 'transform 0.3s ease';
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('scale-[1.02]');
+            });
+        });
     </script>
 </body>
 </html>
