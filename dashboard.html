@@ -65,7 +65,7 @@
         @keyframes popIn { 0% { transform: translate(-50%, -100%) scale(0.5); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
         /* Ajuste de escala para comportar superpopulação */
-        .player-lane { h-14; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; position: relative; }
+        .player-lane { height: 3.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; position: relative; }
         .mover-wrapper { display: flex; align-items: center; gap: 3px; padding: 4px 8px; border-radius: 9999px; transition: transform 0.7s ease-out; }
 
         ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -88,7 +88,8 @@
         <div class="theme-layer bg-cyber" id="theme-cyber"><div class="grid-lines"></div><div class="neon-pulse" style="top: 15%"></div><div class="neon-pulse" style="top: 85%; animation-delay: 2s"></div></div>
     </div>
 
-    <div id="overlay-espera" class="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-700">
+    <!-- TELA DO PIN CORRIGIDA: Usa opacity-0 e hidden para garantir que desapareça -->
+    <div id="overlay-espera" class="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center transition-all duration-700 ease-in-out">
         <h2 class="text-5xl text-white font-bold mb-6 tracking-widest uppercase">ENTRE NA ARENA COM O PIN:</h2>
         <div class="text-[150px] font-black text-[#ffd700] tracking-widest drop-shadow-[0_0_50px_rgba(255,215,0,0.8)] leading-none mb-8" id="pin-gigante">---</div>
         <div class="flex items-center gap-4 bg-white/10 px-8 py-4 rounded-full border border-white/20">
@@ -184,6 +185,7 @@
             appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
             measurementId: "G-W93E7TJ59V"
         };
+        
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
@@ -214,6 +216,30 @@
         const META_PONTOS = 12; // META ATUALIZADA PARA 12
         let vencedores = []; 
         let podioExibido = false;
+
+        // CONTROLE BLINDADO DA TELA DE ESPERA
+        onSnapshot(doc(db, "salas", salaPIN, "configuracao", "estado"), (docSnap) => {
+            const dados = docSnap.data();
+            const overlay = document.getElementById('overlay-espera');
+            
+            if (dados && dados.jogando === true) {
+                // Esconde a tela de PIN (Remove clique e fica invisível)
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => { overlay.classList.add('hidden'); }, 700);
+            } else {
+                // Mostra a tela de PIN
+                overlay.classList.remove('hidden');
+                setTimeout(() => { overlay.classList.remove('opacity-0', 'pointer-events-none'); }, 50);
+            }
+        });
+
+        onSnapshot(doc(db, "salas", salaPIN), (docSnap) => {
+            const dados = docSnap.data();
+            if (dados && dados.encerrada === true) {
+                document.body.innerHTML = '<div class="flex items-center justify-center h-screen bg-black text-white text-5xl uppercase tracking-widest text-[#ffd700] font-bold">AULA ENCERRADA PELO PROFESSOR</div>';
+                setTimeout(() => { window.location.href = "index.html"; }, 5000);
+            }
+        });
 
         function processarAvatar(icone) {
             if(icone.includes('/') || icone.includes('http')) return `<img class="w-full h-full object-contain" src="${icone}">`;
@@ -277,7 +303,7 @@
                 if (!players[nome]) {
                     const lane = document.createElement('div');
                     lane.id = `lane-${nome}`;
-                    lane.className = 'relative h-12 w-full flex items-center lane-border group z-10 shrink-0';
+                    lane.className = 'player-lane relative w-full group z-10 shrink-0';
                     
                     lane.innerHTML = `
                         <div id="mover-${nome}" class="mover-wrapper glass-panel border-white/10 group-hover:border-primary-fixed/40" style="transform: translateX(0%);">
