@@ -1,380 +1,486 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html class="dark" lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Professor - Central</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ARENA PRO | Teacher Panel</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "outline": "#999077", "secondary-fixed": "#e9ddff", "inverse-on-surface": "#313032",
+                        "on-tertiary": "#400688", "outline-variant": "#4d4732", "on-error-container": "#ffdad6",
+                        "on-primary": "#3a3000", "secondary-container": "#6200ea", "background": "#131315",
+                        "surface-container-lowest": "#0e0e10", "primary-container": "#ffd700", "on-secondary-container": "#cfbcff",
+                        "surface-dim": "#131315", "tertiary": "#fcf3ff", "surface-container-high": "#2a2a2c",
+                        "primary": "#fff6df", "inverse-surface": "#e5e1e4", "error": "#ffb4ab", "surface": "#131315",
+                        "secondary-fixed-dim": "#cfbcff", "primary-fixed-dim": "#e9c400", "on-surface-variant": "#d0c6ab",
+                        "on-primary-fixed-variant": "#544600", "secondary": "#cfbcff", "error-container": "#93000a",
+                        "on-background": "#e5e1e4", "on-tertiary-container": "#7146b9", "surface-tint": "#e9c400",
+                        "tertiary-fixed": "#ebdcff", "on-tertiary-fixed": "#260058", "surface-container": "#201f21",
+                        "surface-bright": "#39393b", "on-secondary-fixed": "#22005d", "surface-container-low": "#1c1b1d",
+                        "on-primary-fixed": "#221b00", "surface-container-highest": "#353437", "on-tertiary-fixed-variant": "#582a9f",
+                        "on-surface": "#e5e1e4", "on-secondary": "#3a0092", "on-error": "#690005", "inverse-primary": "#705d00",
+                        "tertiary-container": "#e4d2ff", "surface-variant": "#353437", "on-secondary-fixed-variant": "#5400cc",
+                        "on-primary-container": "#705e00", "tertiary-fixed-dim": "#d4bbff", "primary-fixed": "#ffe16d",
+                        "success": "#10b981", "danger": "#ef4444"
+                    },
+                    spacing: { "gutter": "24px", "unit": "8px", "margin-desktop": "64px", "margin-mobile": "20px", "container-max": "1440px" },
+                    fontFamily: {
+                        "label-lg": ["Sora"], "label-sm": ["Sora"], "headline-lg": ["Sora"], "body-lg": ["Sora"],
+                        "display-lg": ["Sora"], "body-md": ["Sora"], "headline-md": ["Sora"], "mono": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root { --primary: #8e44ad; --success: #2ecc71; --danger: #e74c3c; --dark: #0f0f1a; --card: rgba(28, 28, 45, 0.8); --gold: #ffd700; }
-        body { margin: 0; background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        body { background-color: #0a0a0c; color: #e5e1e4; overflow-x: hidden; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-panel-heavy { background: rgba(98, 0, 234, 0.05); backdrop-filter: blur(40px); border: 1px solid rgba(179, 136, 255, 0.2); }
+        .gold-glow { box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); }
+        .gold-glow-hover:hover { box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); }
+        .btn-3d { transition: transform 0.1s ease, box-shadow 0.1s ease; }
+        .btn-3d:active { transform: translateY(2px); }
+        .char-spacing-widest { letter-spacing: 0.5em; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
         
-        /* SCROLLBAR MODERNA */
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: var(--dark); }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 5px; }
-
-        /* HEADER DE CONTROLE (Fixo no topo) */
-        .admin-header { background: rgba(15, 15, 26, 0.95); backdrop-filter: blur(10px); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 2000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .header-title { margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; }
-        .header-controls { display: flex; align-items: center; gap: 15px; }
-        
-        /* SELECTS E INPUTS MODERNOS */
-        select, input { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 15px; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; }
-        select:focus, input:focus { border-color: var(--primary); background: rgba(255,255,255,0.15); }
-        select option { background: var(--dark); color: white; }
-
-        /* BOTÕES MODERNOS */
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
-        .btn-outline:hover { background: var(--primary); color: white; }
-        .btn-danger { background: rgba(231, 76, 60, 0.1); border: 1px solid var(--danger); color: var(--danger); }
-        .btn-danger:hover { background: var(--danger); color: white; }
-        
-        /* BOTÃO CIRCULAR DE PLAY/PAUSE */
-        .btn-play-circle { width: 55px; height: 55px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 20px rgba(46, 204, 113, 0.4); }
-        .btn-play-circle.play { background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; }
-        .btn-play-circle.pause { background: linear-gradient(135deg, #c0392b, #e74c3c); color: white; box-shadow: 0 0 20px rgba(231, 76, 60, 0.4); }
-        .btn-play-circle:hover { transform: scale(1.1); }
-
-        /* A ARENA EMBUTIDA (Ocupa boa parte da tela) */
-        #admin-arena { width: 100%; height: 55vh; position: relative; overflow: hidden; border-bottom: 5px solid #222; transition: 0.5s; background-size: cover; background-position: center;}
-        
-        /* CSS DOS TEMAS (Igual ao da projeção) */
-        .tema-corrida { background: linear-gradient(to bottom, #2c3e50, #111); }
-        .tema-pixel { background: #5c94fc; border-bottom: 30px solid #c84c0c !important; }
-        .tema-pixel::after { content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 15px; background: #00a800; }
-        .tema-gelo { background: linear-gradient(to bottom, #a1c4fd, #c2e9fb); border-bottom: 30px solid #ffffff !important; }
-        .tema-dragao { background: linear-gradient(to bottom, #2b1055, #7597de); border-bottom: 30px solid #2c3e50 !important; }
-        .tema-medieval { background: linear-gradient(to bottom, #4ca1af, #c4e0e5); border-bottom: 30px solid #5d4037 !important; }
-        .tema-scifi { background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e); border-bottom: 30px solid #000 !important; }
-        .tema-inca { background: linear-gradient(to bottom, #11998e, #38ef7d); border-bottom: 30px solid #8d6e63 !important; }
-        .tema-dino { background: linear-gradient(to bottom, #ff7e5f, #feb47b); border-bottom: 30px solid #3e2723 !important; }
-        .tema-lego { background: #4fc3f7; border-bottom: 30px solid #e53935 !important; }
-
-        /* Elementos da Arena */
-        .finish-line { position: absolute; right: 8%; bottom: 5%; height: 70%; width: 50px; border: 3px solid rgba(255,255,255,0.3); border-radius: 10px 10px 0 0; display: flex; justify-content: center; background: rgba(255, 215, 0, 0.2); }
-        .finish-line::after { content: "🏁"; margin-top: -25px; font-size: 30px; }
-        .player-container { position: absolute; transition: all 0.6s ease; display: flex; flex-direction: column; align-items: center; z-index: 10; }
-        .avatar { font-size: 35px; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.6)); }
-        .name-tag { background: rgba(0,0,0,0.8); color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-top: 3px; }
-
-        /* ÁREA INFERIOR (Formulário e Lista) */
-        .bottom-section { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; padding: 30px; max-width: 1200px; margin: 0 auto; }
-        .glass-card { background: var(--card); backdrop-filter: blur(10px); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        
-        h3 { color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 8px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 5px; }
-        .grid-opcoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
-        /* LISTA DE PERGUNTAS */
-        .lista-perguntas { max-height: 400px; overflow-y: auto; padding-right: 5px; }
-        .item-pergunta { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--primary); transition: 0.2s;}
-        .item-pergunta:hover { background: rgba(0,0,0,0.5); }
-        .item-text strong { display: block; margin-bottom: 5px; font-size: 15px; }
-        .item-text span { font-size: 12px; color: #2ecc71; }
-        .acoes { display: flex; gap: 5px; }
-        .btn-icon { background: rgba(255,255,255,0.1); border: none; padding: 8px; border-radius: 5px; cursor: pointer; color: white; transition: 0.2s; }
-        .btn-icon:hover { background: var(--primary); }
-        .btn-icon.del:hover { background: var(--danger); }
-
-        /* TELA DE LOGIN DO PROFESSOR */
-        #login-prof { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--dark); z-index: 3000; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: var(--card); padding: 40px; border-radius: 15px; text-align: center; width: 300px; border: 1px solid var(--primary); }
+        /* Scrollbar customizada para as listas */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #6200ea; border-radius: 4px; }
     </style>
 </head>
-<body>
+<body class="font-body-md selection:bg-primary-container selection:text-on-primary-container">
 
-<div id="login-prof">
-    <div class="login-box">
-        <h2 style="color:var(--primary); margin-top:0;">Área do Professor</h2>
-        <select id="login-disciplina" style="width:100%; margin-bottom:15px;">
-            <option value="" disabled selected>Sua Disciplina...</option>
-            <option value="matematica">Matemática</option> <option value="portugues">Português</option>
-            <option value="biologia">Biologia</option> <option value="historia">História</option>
-            <option value="geografia">Geografia</option> <option value="fisica">Física</option>
-            <option value="quimica">Química</option>
-        </select>
-        <input type="password" id="login-senha" placeholder="Senha (1234)" style="width:100%; margin-bottom:20px; box-sizing:border-box;">
-        <button class="btn" style="width:100%; background:var(--primary); color:white;" onclick="logar()">ENTRAR NO COMANDO</button>
-    </div>
-</div>
-
-<div id="painel-principal" style="display:none;">
-
-    <div class="admin-header">
-        <h2 class="header-title">🛡️ <span id="nome-sala-display">SALA</span></h2>
-        
-        <div class="header-controls">
-            <select id="select-tema" onchange="mudarCenario()" title="Escolha o Cenário">
-                <option value="tema-pixel">🍄 Castelo Retrô</option>
-                <option value="tema-gelo">🧊 Era do Gelo</option>
-                <option value="tema-dragao">🐉 Dragões</option>
-                <option value="tema-medieval">🏰 Medieval</option>
-                <option value="tema-scifi">🚀 Sci-Fi</option>
-                <option value="tema-inca">🛕 Incas</option>
-                <option value="tema-dino">🦖 Dinossauros</option>
-                <option value="tema-lego">🧱 Lego</option>
-                <option value="tema-corrida">🏃 Corrida Plana</option>
-            </select>
-            
-            <button class="btn btn-outline" onclick="abrirProjecao()">📺 PROJETAR ARENA</button>
-            <button class="btn btn-danger" onclick="limparTurma()">🧹 ZERAR SALA</button>
-            
-            <button id="btn-play-circle" class="btn-play-circle play" onclick="alternarPlay()" title="Dar Play nas Perguntas">
-                ▶️
+    <nav class="flex justify-between items-center px-gutter py-4 w-full z-50 top-0 left-0 fixed backdrop-blur-xl border-b border-white/10">
+        <div class="font-headline-lg text-headline-lg uppercase tracking-tighter text-primary-fixed">ARENA PRO</div>
+        <div class="flex gap-4 items-center">
+            <button onclick="window.encerrarAula()" class="bg-red-600/20 text-red-500 border border-red-500/50 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-red-600/40 transition-colors mr-2">
+                Encerrar Aula
             </button>
+            <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed transition-colors" onclick="window.location.href='index.html'" title="Sair">account_circle</span>
+            <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed transition-colors">settings</span>
         </div>
-    </div>
+    </nav>
 
-    <div id="admin-arena" class="tema-pixel">
-        <div class="finish-line"></div>
-        </div>
-
-    <div class="bottom-section">
+    <main class="min-h-screen pt-24 pb-12 px-gutter max-w-container-max mx-auto relative">
         
-        <div class="glass-card">
-            <h3 id="titulo-form">📝 Nova Pergunta</h3>
-            <div class="form-group">
-                <label>Enunciado da Pergunta</label>
-                <input type="text" id="txt-pergunta" placeholder="Digite a pergunta aqui...">
-            </div>
-            
-            <label style="font-size: 13px; color: #aaa;">Alternativas</label>
-            <div class="grid-opcoes form-group">
-                <input type="text" id="opt0" placeholder="Opção A (0)">
-                <input type="text" id="opt1" placeholder="Opção B (1)">
-                <input type="text" id="opt2" placeholder="Opção C (2)">
-                <input type="text" id="opt3" placeholder="Opção D (3)">
-            </div>
-
-            <div class="form-group">
-                <label>Qual é a correta?</label>
-                <select id="select-correta">
-                    <option value="0">Opção A</option> <option value="1">Opção B</option>
-                    <option value="2">Opção C</option> <option value="3">Opção D</option>
-                </select>
-            </div>
-
-            <button class="btn" style="width:100%; background:var(--primary); color:white;" id="btnSalvar">SALVAR PERGUNTA</button>
-        </div>
-
-        <div class="glass-card">
-            <h3>📋 Banco de Missões</h3>
-            <div class="lista-perguntas" id="lista-render">
+        <section class="flex items-center justify-center min-h-[70vh]" id="setup-phase">
+            <div class="glass-panel-heavy p-12 rounded-xl w-full max-w-xl text-center flex flex-col gap-8 animate-in fade-in zoom-in duration-500 rounded-full">
+                <div>
+                    <h1 class="font-headline-lg text-headline-lg text-primary-fixed mb-2">Criar Nova Sessão</h1>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Painel de Controle do Instrutor</p>
                 </div>
-        </div>
+                <div class="bg-surface-container p-4 rounded-lg border border-white/5 flex items-center justify-between">
+                    <span class="text-on-surface-variant font-label-lg">ID Logado:</span>
+                    <span class="font-mono text-primary-fixed font-bold tracking-wider" id="profID">CARREGANDO...</span>
+                </div>
+                <div class="space-y-2 text-left">
+                    <label class="font-label-sm text-on-surface-variant px-1">Nome da Disciplina</label>
+                    <input id="nome-disciplina" class="w-full h-16 bg-black/40 border-b-2 border-secondary-container focus:border-primary-container text-primary-fixed font-headline-md px-4 outline-none transition-all placeholder:text-on-tertiary-fixed-variant/50 rounded-xl" placeholder="Ex: Engenharia de Software II" type="text" autocomplete="off">
+                </div>
+                <button onclick="window.gerarSala()" class="w-full py-5 bg-primary-container text-on-primary-fixed font-headline-md uppercase tracking-tight gold-glow-hover btn-3d rounded-sm rounded-full">
+                    GERAR PIN DA SALA
+                </button>
+            </div>
+        </section>
 
-    </div>
-</div>
+        <section class="hidden grid grid-cols-12 gap-gutter" id="dashboard-phase">
+            
+            <header class="col-span-12 glass-panel p-8 rounded-xl flex flex-wrap items-center justify-between gap-6 mb-4 rounded-full">
+                <div class="flex items-center gap-6">
+                    <div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-fixed shadow-[0_0_15px_#ffd700]">
+                        <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">sports_esports</span>
+                    </div>
+                    <div>
+                        <p class="text-on-surface-variant font-label-sm uppercase tracking-widest">Sessão Ativa</p>
+                        <h2 class="font-headline-md text-headline-md text-white" id="session-theme">---</h2>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col items-center px-8 border-x border-white/10">
+                    <p class="text-on-surface-variant font-label-sm uppercase tracking-widest mb-1">PIN DE ACESSO</p>
+                    <span class="font-mono text-5xl font-extrabold text-primary-fixed char-spacing-widest" id="meuPIN">00000</span>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <select id="select-tema" class="bg-transparent border-2 border-white/10 text-white font-label-sm rounded-full px-4 py-3 outline-none hover:border-secondary-container transition-all appearance-none cursor-pointer">
+                        <option value="tema-pixel" class="bg-surface-container">🍄 Castelo Retrô</option>
+                        <option value="tema-dino" class="bg-surface-container">🦖 Dinossauros</option>
+                        <option value="tema-scifi" class="bg-surface-container">🚀 Sci-Fi</option>
+                        <option value="tema-corrida" class="bg-surface-container">🏃 Pista Plana</option>
+                        <option value="tema-inca" class="bg-surface-container">🛕 Incas</option>
+                    </select>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDocs, addDoc, collection, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+                    <button onclick="window.abrirProjecao()" class="flex items-center gap-2 px-6 py-4 bg-transparent border-2 border-secondary-container text-secondary font-label-lg rounded-sm hover:bg-secondary-container/10 transition-all btn-3d rounded-full">
+                        <span class="material-symbols-outlined">tv</span> PROJETAR ARENA
+                    </button>
+                    
+                    <button class="w-20 h-20 rounded-full border-4 border-success flex items-center justify-center text-success hover:bg-success/10 transition-all gold-glow-hover btn-3d group shadow-[0_0_15px_rgba(16,185,129,0.3)]" id="playPauseToggle" onclick="window.alternarPlay()">
+                        <span class="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform" id="play-icon" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                    </button>
+                </div>
+            </header>
 
-    const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
+            <aside class="col-span-12 lg:col-span-5 flex flex-col gap-gutter">
+                <div class="glass-panel p-8 rounded-xl flex flex-col gap-6 rounded-[2rem]">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="material-symbols-outlined text-primary-fixed">add_task</span>
+                        <h3 class="font-headline-md text-headline-md text-white" id="titulo-form">Cadastrar Missão</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <label class="text-on-surface-variant font-label-sm">ENUNCIADO DA QUESTÃO</label>
+                            <textarea id="txt-pergunta" class="w-full min-h-[120px] bg-black/40 border-b-2 border-secondary-container focus:border-primary-container text-white p-4 outline-none transition-all rounded-t-md rounded-xl" placeholder="Digite a pergunta para os jogadores..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary-fixed">A</span><input id="opt0" class="w-full h-12 bg-white/5 border border-white/10 rounded-sm pl-10 pr-4 focus:border-primary-fixed outline-none rounded-xl text-white" type="text" autocomplete="off"></div>
+                            <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary-fixed">B</span><input id="opt1" class="w-full h-12 bg-white/5 border border-white/10 rounded-sm pl-10 pr-4 focus:border-primary-fixed outline-none rounded-xl text-white" type="text" autocomplete="off"></div>
+                            <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary-fixed">C</span><input id="opt2" class="w-full h-12 bg-white/5 border border-white/10 rounded-sm pl-10 pr-4 focus:border-primary-fixed outline-none rounded-xl text-white" type="text" autocomplete="off"></div>
+                            <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary-fixed">D</span><input id="opt3" class="w-full h-12 bg-white/5 border border-white/10 rounded-sm pl-10 pr-4 focus:border-primary-fixed outline-none rounded-xl text-white" type="text" autocomplete="off"></div>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-on-surface-variant font-label-sm">RESPOSTA CORRETA</label>
+                            <select id="select-correta" class="w-full h-12 bg-surface-container-high border border-white/10 rounded-sm px-4 text-white focus:ring-1 focus:ring-primary-container outline-none rounded-xl">
+                                <option value="0">Alternativa A</option>
+                                <option value="1">Alternativa B</option>
+                                <option value="2">Alternativa C</option>
+                                <option value="3">Alternativa D</option>
+                            </select>
+                        </div>
+                        <button id="btnSalvar" onclick="window.salvarPergunta()" class="w-full py-4 bg-primary-container text-on-primary-fixed font-label-lg uppercase tracking-widest btn-3d mt-4 rounded-sm rounded-full">
+                            SALVAR PERGUNTA
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-xl rounded-[2rem] flex-grow max-h-[350px] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-label-lg text-white">Missões Salvas</h4>
+                        <span id="contador-perguntas" class="bg-secondary-container/30 text-secondary px-3 py-1 rounded-full text-[10px] font-bold">0</span>
+                    </div>
+                    <div class="space-y-2" id="lista-render">
+                        <p class="text-on-surface-variant text-sm text-center py-4">Nenhuma missão cadastrada ainda.</p>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="col-span-12 lg:col-span-7 flex flex-col gap-gutter">
+                
+                <section class="glass-panel rounded-xl overflow-hidden rounded-[2rem]">
+                    <div class="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary-fixed">analytics</span>
+                            <h3 class="font-label-lg text-white uppercase tracking-wider">📊 Estatísticas de Desempenho ao Vivo</h3>
+                        </div>
+                        <span class="text-[10px] text-success animate-pulse flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-success rounded-full"></span> LIVE STREAMING
+                        </span>
+                    </div>
+                    <div class="overflow-x-auto max-h-[300px] overflow-y-auto">
+                        <table class="w-full text-left">
+                            <thead class="sticky top-0 bg-surface-container/90 backdrop-blur z-10">
+                                <tr class="text-on-surface-variant text-[11px] uppercase tracking-widest bg-black/20">
+                                    <th class="px-6 py-4 font-normal">Questão</th>
+                                    <th class="px-6 py-4 font-normal">Engajamento</th>
+                                    <th class="px-6 py-4 font-normal text-right">Taxa de Acerto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="questions-stats">
+                                <tr><td colspan="3" class="px-6 py-8 text-center text-on-surface-variant text-sm">Aguardando respostas na arena...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="glass-panel rounded-xl overflow-hidden flex-grow rounded-[2rem] flex flex-col">
+                    <div class="p-6 border-b border-white/10 flex flex-wrap justify-between items-center bg-white/5 gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary-fixed">groups</span>
+                            <h3 class="font-label-lg text-white uppercase tracking-wider">👤 Dossiê dos Personagens</h3>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs font-mono text-on-surface-variant">
+                            <span>ONLINE: <span class="text-primary-fixed font-bold text-lg" id="jogadores-online">0</span></span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 overflow-y-auto max-h-[400px]" id="character-list">
+                        <div class="col-span-full text-center text-on-surface-variant py-8">Nenhum guerreiro conectado. Forneça o PIN!</div>
+                    </div>
+                </section>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="w-full py-6 mt-auto border-t border-white/5 flex flex-col items-center gap-4 px-margin-desktop bg-surface-container-lowest">
+        <div class="text-primary-fixed font-black tracking-tighter">ARENA PRO</div>
+        <p class="font-label-sm text-label-sm text-on-surface-variant opacity-50 uppercase tracking-widest">© 2024 ARENA PRO E-SPORTS. ALL RIGHTS RESERVED.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDocs, addDoc, collection, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
     authDomain: "yvypoty-491e8.firebaseapp.com",
     projectId: "yvypoty-491e8",
     storageBucket: "yvypoty-491e8.firebasestorage.app",
     messagingSenderId: "338156073833",
     appId: "1:338156073833:web:ca0d8ede1456dad29243f8",
-    measurementId: "G-W93E7TJ59V"};
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    measurementId: "G-W93E7TJ59V" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    let disciplina = "";
-    let jogoRodando = false;
-    let editandoId = null;
-    const players = {};
-    const META_PONTOS = 10;
+        // VALIDAÇÃO DE LOGIN
+        const profID = localStorage.getItem("profID");
+        if(!profID) window.location.href = "index.html";
+        document.getElementById('profID').innerText = profID;
 
-    // --- 1. LOGIN DO PROFESSOR ---
-    window.logar = () => {
-        disciplina = document.getElementById('login-disciplina').value;
-        const senha = document.getElementById('login-senha').value;
-        if(disciplina && senha === "1234") {
-            document.getElementById('login-prof').style.display = 'none';
-            document.getElementById('painel-principal').style.display = 'block';
-            document.getElementById('nome-sala-display').innerText = disciplina.toUpperCase();
-            localStorage.setItem("disciplinaAtiva", disciplina); // Salva para a projeção saber
+        let meuPIN = "";
+        let jogoRodando = false;
+        let editandoId = null;
+
+        // --- 1. SETUP DA SALA ---
+        window.gerarSala = async () => {
+            const disciplina = document.getElementById('nome-disciplina').value.trim();
+            if(!disciplina) { alert("Dê um nome para a aula!"); return; }
+
+            meuPIN = Math.floor(10000 + Math.random() * 90000).toString();
             
-            iniciarEscutaArena();
+            await setDoc(doc(db, "salas", meuPIN), { disciplina: disciplina, professor: profID, criadaEm: new Date().toISOString(), encerrada: false });
+            await setDoc(doc(db, "salas", meuPIN, "configuracao", "estado"), { jogando: false });
+
+            localStorage.setItem("salaPIN", meuPIN);
+            localStorage.setItem("disciplinaAtiva", disciplina);
+
+            document.getElementById('setup-phase').classList.add('hidden');
+            document.getElementById('dashboard-phase').classList.remove('hidden');
+            
+            document.getElementById('meuPIN').innerText = meuPIN;
+            document.getElementById('session-theme').innerText = disciplina;
+
             iniciarEscutaPerguntas();
-            verificarEstadoPlay();
-        } else {
-            alert("Senha ou Disciplina inválida.");
-        }
-    }
-
-    // --- 2. CONTROLES DO HEADER ---
-    window.mudarCenario = () => {
-        const tema = document.getElementById('select-tema').value;
-        document.getElementById('admin-arena').className = tema;
-        localStorage.setItem("temaAtivo", tema); // Salva para quando abrir a projeção
-    }
-
-    window.abrirProjecao = () => {
-        window.open("dashboard.html", "_blank");
-    }
-
-    window.alternarPlay = async () => {
-        jogoRodando = !jogoRodando;
-        await setDoc(doc(db, "salas", disciplina, "configuracao", "estado"), { jogando: jogoRodando }, { merge: true });
-        atualizarBotaoPlay();
-    }
-
-    function atualizarBotaoPlay() {
-        const btn = document.getElementById('btn-play-circle');
-        if(jogoRodando) {
-            btn.className = "btn-play-circle pause";
-            btn.innerHTML = "⏸️";
-            btn.title = "Pausar Perguntas";
-        } else {
-            btn.className = "btn-play-circle play";
-            btn.innerHTML = "▶️";
-            btn.title = "Dar Play nas Perguntas";
-        }
-    }
-
-    function verificarEstadoPlay() {
-        onSnapshot(doc(db, "salas", disciplina, "configuracao", "estado"), (docSnap) => {
-            if (docSnap.exists()) {
-                jogoRodando = docSnap.data().jogando || false;
-                atualizarBotaoPlay();
-            }
-        });
-    }
-
-    window.limparTurma = async () => {
-        if(confirm("Tem certeza que deseja ZERAR todos os pontos e deslogar os alunos da sala de " + disciplina.toUpperCase() + "?")) {
-            const queryJogadores = await getDocs(collection(db, "salas", disciplina, "jogadores"));
-            queryJogadores.forEach(d => deleteDoc(doc(db, "salas", disciplina, "jogadores", d.id)));
+            iniciarMotorDeEstatisticas();
+            iniciarEscutaJogadores();
             
-            await setDoc(doc(db, "salas", disciplina, "configuracao", "personagens"), {});
-            await setDoc(doc(db, "salas", disciplina, "configuracao", "estado"), { jogando: false }, { merge: true });
-            
-            document.getElementById('admin-arena').innerHTML = '<div class="finish-line"></div>'; // Limpa a tela local
-            alert("Sala purificada!");
+            // Inicia o timer de inatividade apenas após a sala estar gerada
+            resetarInatividade();
         }
-    }
 
-    // --- 3. A ARENA EMBUTIDA (Visão do Prof) ---
-    function iniciarEscutaArena() {
-        const arenaDOM = document.getElementById('admin-arena');
-        onSnapshot(collection(db, "salas", disciplina, "jogadores"), (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                const dados = change.doc.data();
-                const nome = change.doc.id;
-                let acertos = dados.acertos || 0;
-                let icone = dados.sprite || "⏳";
+        // --- 2. CONTROLES DO HEADER ---
+        window.abrirProjecao = () => {
+            const tema = document.getElementById('select-tema').value;
+            localStorage.setItem("temaAtivo", tema);
+            window.open("dashboard.html", "_blank");
+        }
 
-                if (change.type === "removed") {
-                    const el = document.getElementById(`p-admin-${nome}`);
-                    if (el) el.remove();
-                    delete players[nome];
-                    return;
-                }
-
-                if (!players[nome]) {
-                    const container = document.createElement('div');
-                    container.id = `p-admin-${nome}`;
-                    container.className = 'player-container';
-                    container.innerHTML = `<div class="avatar">${icone}</div><div class="name-tag">${nome} (${acertos})</div>`;
-                    arenaDOM.appendChild(container);
-                    players[nome] = true;
-                } else {
-                    document.querySelector(`#p-admin-${nome} .avatar`).innerText = icone;
-                    document.querySelector(`#p-admin-${nome} .name-tag`).innerText = `${nome} (${acertos})`;
-                }
-
-                const pElement = document.getElementById(`p-admin-${nome}`);
-                const temaAtual = document.getElementById('select-tema').value;
-                
-                // Lógica de Movimento simplificada para o painel do professor
-                pElement.style.left = `${5 + (acertos * 8)}%`;
-                
-                if (temaAtual !== 'tema-corrida') {
-                    pElement.style.bottom = `${10 + (acertos * 5)}%`;
-                    pElement.style.top = "auto";
-                } else {
-                    let hash = nome.length * 5; 
-                    pElement.style.top = `${20 + (hash % 50)}%`;
-                }
-            });
-        });
-    }
-
-    // --- 4. GESTÃO DE PERGUNTAS ---
-    document.getElementById('btnSalvar').onclick = async () => {
-        const p = document.getElementById('txt-pergunta').value;
-        const o0 = document.getElementById('opt0').value; const o1 = document.getElementById('opt1').value;
-        const o2 = document.getElementById('opt2').value; const o3 = document.getElementById('opt3').value;
-        const correta = parseInt(document.getElementById('select-correta').value);
-
-        if (!p || !o0 || !o1) { alert("Preencha o enunciado e as alternativas principais!"); return; }
-        const dados = { enunciado: p, opcoes: [o0, o1, o2, o3], correta: correta };
-
-        try {
-            if(editandoId) {
-                await updateDoc(doc(db, "salas", disciplina, "perguntas", editandoId), dados);
-                editandoId = null;
-                document.getElementById('titulo-form').innerText = "📝 Nova Pergunta";
-                document.getElementById('btnSalvar').innerText = "SALVAR PERGUNTA";
-                document.getElementById('btnSalvar').style.background = "var(--primary)";
+        window.alternarPlay = async () => {
+            jogoRodando = !jogoRodando;
+            await setDoc(doc(db, "salas", meuPIN, "configuracao", "estado"), { jogando: jogoRodando }, { merge: true });
+            
+            const btn = document.getElementById('playPauseToggle');
+            const icon = document.getElementById('play-icon');
+            
+            if (jogoRodando) {
+                btn.classList.replace('border-success', 'border-danger');
+                btn.classList.replace('text-success', 'text-danger');
+                btn.style.boxShadow = "0 0 15px rgba(239, 68, 68, 0.4)";
+                icon.innerText = 'pause';
             } else {
-                await addDoc(collection(db, "salas", disciplina, "perguntas"), dados);
+                btn.classList.replace('border-danger', 'border-success');
+                btn.classList.replace('text-danger', 'text-success');
+                btn.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.4)";
+                icon.innerText = 'play_arrow';
             }
-            limparForm();
-        } catch (error) { alert("Erro ao salvar."); }
-    }
+        }
 
-    function limparForm() {
-        document.getElementById('txt-pergunta').value = "";
-        document.getElementById('opt0').value = ""; document.getElementById('opt1').value = "";
-        document.getElementById('opt2').value = ""; document.getElementById('opt3').value = "";
-    }
+        // --- 3. CRUD PERGUNTAS ---
+        window.salvarPergunta = async () => {
+            const p = document.getElementById('txt-pergunta').value;
+            const opts = [document.getElementById('opt0').value, document.getElementById('opt1').value, document.getElementById('opt2').value, document.getElementById('opt3').value];
+            const cor = parseInt(document.getElementById('select-correta').value);
 
-    function iniciarEscutaPerguntas() {
-        onSnapshot(collection(db, "salas", disciplina, "perguntas"), (snapshot) => {
-            const painel = document.getElementById('lista-render');
-            painel.innerHTML = "";
-            if(snapshot.empty) { painel.innerHTML = "<p style='color:#aaa;'>Nenhuma pergunta cadastrada.</p>"; return; }
+            if (!p || !opts[0] || !opts[1]) { alert("Preencha o enunciado e pelo menos as opções A e B!"); return; }
+            const dados = { enunciado: p, opcoes: opts, correta: cor };
 
-            snapshot.forEach((documento) => {
-                const q = documento.data(); const id = documento.id;
-                const div = document.createElement('div');
-                div.className = "item-pergunta";
-                div.innerHTML = `
-                    <div class="item-text">
-                        <strong>${q.enunciado}</strong>
-                        <span>Correta: ${q.opcoes[q.correta]}</span>
-                    </div>
-                    <div class="acoes">
-                        <button class="btn-icon" onclick="editar('${id}', '${q.enunciado.replace(/'/g, "\\'")}', '${q.opcoes[0]}', '${q.opcoes[1]}', '${q.opcoes[2]}', '${q.opcoes[3]}', ${q.correta})" title="Editar">✏️</button>
-                        <button class="btn-icon del" onclick="deletar('${id}')" title="Excluir">🗑️</button>
+            try {
+                if(editandoId) {
+                    await updateDoc(doc(db, "salas", meuPIN, "perguntas", editandoId), dados);
+                    editandoId = null;
+                    document.getElementById('titulo-form').innerText = "Cadastrar Missão";
+                    document.getElementById('btnSalvar').innerText = "SALVAR PERGUNTA";
+                } else {
+                    await addDoc(collection(db, "salas", meuPIN, "perguntas"), dados);
+                }
+                ['txt-pergunta', 'opt0', 'opt1', 'opt2', 'opt3'].forEach(id => document.getElementById(id).value = "");
+            } catch(e) { alert("Erro ao salvar."); }
+        }
+
+        function iniciarEscutaPerguntas() {
+            onSnapshot(collection(db, "salas", meuPIN, "perguntas"), (snapshot) => {
+                const painel = document.getElementById('lista-render');
+                document.getElementById('contador-perguntas').innerText = snapshot.docs.length;
+                painel.innerHTML = "";
+                
+                if(snapshot.empty) { painel.innerHTML = "<p class='text-on-surface-variant text-sm text-center py-4'>Nenhuma missão cadastrada.</p>"; return; }
+
+                snapshot.forEach((docSnap) => {
+                    const q = docSnap.data(); const id = docSnap.id;
+                    const div = document.createElement('div');
+                    div.className = "p-3 bg-white/5 rounded border-l-4 border-success flex justify-between items-center group transition-colors hover:bg-white/10 rounded-lg";
+                    div.innerHTML = `
+                        <span class="text-sm truncate pr-4 text-white">${q.enunciado} <span class="text-[10px] text-success ml-2">(Correta: ${['A','B','C','D'][q.correta]})</span></span>
+                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-sm text-primary-fixed cursor-pointer hover:scale-110" onclick="window.editarPergunta('${id}', '${q.enunciado.replace(/'/g, "\\'")}', '${q.opcoes[0]}', '${q.opcoes[1]}', '${q.opcoes[2]}', '${q.opcoes[3]}', ${q.correta})">edit</span>
+                            <span class="material-symbols-outlined text-sm text-danger cursor-pointer hover:scale-110" onclick="window.deletarPergunta('${id}')">delete</span>
+                        </div>
+                    `;
+                    painel.appendChild(div);
+                });
+            });
+        }
+
+        window.editarPergunta = (id, en, o0, o1, o2, o3, cor) => {
+            editandoId = id;
+            document.getElementById('txt-pergunta').value = en;
+            document.getElementById('opt0').value = o0; document.getElementById('opt1').value = o1;
+            document.getElementById('opt2').value = o2; document.getElementById('opt3').value = o3;
+            document.getElementById('select-correta').value = cor;
+            document.getElementById('titulo-form').innerText = "Editar Missão";
+            document.getElementById('btnSalvar').innerText = "ATUALIZAR PERGUNTA";
+        }
+
+        window.deletarPergunta = async (id) => { if(confirm("Deletar pergunta?")) await deleteDoc(doc(db, "salas", meuPIN, "perguntas", id)); }
+
+        // --- 4. ESTATÍSTICAS E JOGADORES ---
+        function iniciarEscutaJogadores() {
+            onSnapshot(collection(db, "salas", meuPIN, "jogadores"), (snapshot) => {
+                document.getElementById('jogadores-online').innerText = snapshot.docs.length;
+            });
+        }
+
+        function iniciarMotorDeEstatisticas() {
+            onSnapshot(collection(db, "salas", meuPIN, "respostas"), (snap) => {
+                if(snap.empty) return;
+                let statsPerguntas = {}; let statsJogadores = {};
+
+                snap.docs.forEach(docSnap => {
+                    const r = docSnap.data(); 
+                    if(!statsPerguntas[r.pergunta]) statsPerguntas[r.pergunta] = { certos: 0, errados: 0 };
+                    if(r.acertou) statsPerguntas[r.pergunta].certos++; else statsPerguntas[r.pergunta].errados++;
+
+                    if(!statsJogadores[r.nick]) statsJogadores[r.nick] = { avatar: r.personagem, certos: 0, errados: 0 };
+                    if(r.acertou) statsJogadores[r.nick].certos++; else statsJogadores[r.nick].errados++;
+                });
+
+                renderizarPerguntasStats(statsPerguntas);
+                renderizarJogadoresDossie(statsJogadores);
+            });
+        }
+
+        function renderizarPerguntasStats(perguntas) {
+            let html = ""; let i = 1;
+            for(let p in perguntas) {
+                let total = perguntas[p].certos + perguntas[p].errados;
+                let taxa = Math.round((perguntas[p].certos / total) * 100) || 0;
+                let barColor = taxa >= 70 ? 'bg-success' : (taxa >= 40 ? 'bg-primary-fixed' : 'bg-danger');
+                let textColor = taxa >= 70 ? 'text-success' : (taxa >= 40 ? 'text-primary-fixed' : 'text-danger');
+
+                html += `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">
+                            <span class="font-mono text-sm text-primary-fixed block mb-1">Q${i.toString().padStart(2, '0')}</span>
+                            <span class="text-xs text-on-surface-variant line-clamp-1" title="${p}">${p}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="w-32 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full ${barColor}" style="width: ${taxa}%"></div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 ${textColor} font-bold text-right">${taxa}%</td>
+                    </tr>
+                `;
+                i++;
+            }
+            document.getElementById('questions-stats').innerHTML = html;
+        }
+
+        function renderizarJogadoresDossie(jogadores) {
+            let html = "";
+            for(let j in jogadores) {
+                let total = jogadores[j].certos + jogadores[j].errados;
+                let taxa = Math.round((jogadores[j].certos / Math.max(total, 1)) * 100);
+                let corBorda = taxa >= 70 ? 'border-success' : (taxa >= 40 ? 'border-outline' : 'border-danger');
+                let corTexto = taxa >= 70 ? 'text-success' : (taxa >= 40 ? 'text-primary-fixed' : 'text-danger');
+                
+                let avatarHtml = jogadores[j].avatar.includes('/') || jogadores[j].avatar.includes('http') 
+                    ? `<img class="w-full h-full object-cover" src="${jogadores[j].avatar}">` 
+                    : `<span class="text-3xl">${jogadores[j].avatar}</span>`;
+
+                html += `
+                    <div class="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/10 hover:border-primary-container/50 transition-all cursor-pointer group rounded-xl">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-full overflow-hidden border-2 ${corBorda} flex items-center justify-center bg-black/50">
+                                ${avatarHtml}
+                            </div>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-start">
+                                <p class="font-label-lg text-white group-hover:text-primary-fixed transition-colors truncate max-w-[120px]">${j}</p>
+                                <span class="font-mono text-xs text-primary-fixed">${jogadores[j].certos} pts</span>
+                            </div>
+                            <p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Taxa de Acerto: <span class="${corTexto} font-bold">${taxa}%</span></p>
+                        </div>
                     </div>
                 `;
-                painel.appendChild(div);
-            });
-        });
-    }
+            }
+            document.getElementById('character-list').innerHTML = html || `<div class="col-span-full text-center text-on-surface-variant py-8">Nenhuma resposta registrada ainda.</div>`;
+        }
 
-    window.editar = (id, en, o0, o1, o2, o3, cor) => {
-        editandoId = id;
-        document.getElementById('txt-pergunta').value = en;
-        document.getElementById('opt0').value = o0; document.getElementById('opt1').value = o1;
-        document.getElementById('opt2').value = o2; document.getElementById('opt3').value = o3;
-        document.getElementById('select-correta').value = cor;
-        
-        document.getElementById('titulo-form').innerText = "✏️ Editando Pergunta";
-        document.getElementById('btnSalvar').innerText = "ATUALIZAR PERGUNTA";
-        document.getElementById('btnSalvar').style.background = "#f39c12";
-    }
+        // --- 5. CONTROLE DE SESSÃO E INATIVIDADE ---
+        window.encerrarAula = async () => {
+            if(confirm("Deseja realmente ENCERRAR a aula? O placar sumirá e os alunos serão desconectados da sala.")) {
+                if (meuPIN) {
+                    // Atualiza a flag "encerrada" na sala
+                    await setDoc(doc(db, "salas", meuPIN), { encerrada: true }, { merge: true });
+                }
+                
+                // Limpa o local storage
+                localStorage.removeItem("profID");
+                localStorage.removeItem("salaPIN");
+                localStorage.removeItem("disciplinaAtiva");
+                
+                // Redireciona
+                window.location.href = "index.html";
+            }
+        }
 
-    window.deletar = async (id) => {
-        if(confirm("Excluir esta pergunta permanentemente?")) await deleteDoc(doc(db, "salas", disciplina, "perguntas", id));
-    }
-</script>
+        // Função que encerra a sessão por inatividade (30 minutos)
+        let inatividadeTimer;
+        function resetarInatividade() {
+            clearTimeout(inatividadeTimer);
+            inatividadeTimer = setTimeout(() => {
+                if(meuPIN) {
+                    alert("A sessão foi encerrada por 30 minutos de inatividade.");
+                    setDoc(doc(db, "salas", meuPIN), { encerrada: true }, { merge: true }).then(() => {
+                        localStorage.removeItem("salaPIN");
+                        localStorage.removeItem("disciplinaAtiva");
+                        window.location.href = "index.html";
+                    });
+                }
+            }, 30 * 60 * 1000); // 30 minutos
+        }
+
+        // Inicia o timer e reseta com qualquer atividade
+        window.onload = resetarInatividade;
+        document.onmousemove = resetarInatividade;
+        document.onkeypress = resetarInatividade;
+    </script>
 </body>
 </html>
