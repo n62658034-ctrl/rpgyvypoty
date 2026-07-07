@@ -142,19 +142,33 @@
         document.getElementById('display-pin').innerText = salaPIN;
         document.getElementById('display-nick').innerText = nick;
 
-        // SEUS PERSONAGENS COM IMAGENS REAIS
+        // LISTA DE 25 PERSONAGENS
         const herois = [
-            { id: "mago", nome: "Mago", sprite: "img/mago.png", tier: "world-cup" },
+            { id: "predador", nome: "Predador", sprite: "img/predador.png", tier: "world-cup" },
+            { id: "mago", nome: "Mago", sprite: "img/mago.png", tier: "standard" },
+            { id: "detetive", nome: "Detetive", sprite: "img/detetive.png", tier: "standard" },
+            { id: "alien", nome: "Alien", sprite: "img/alien.png", tier: "world-cup" },
+            { id: "sereia", nome: "Sereia", sprite: "img/sereia.png", tier: "standard" },
+            { id: "zumbi", nome: "Zumbi", sprite: "img/zumbi.png", tier: "standard" },
+            { id: "astronauta", nome: "Astronauta", sprite: "img/astronauta.png", tier: "world-cup" },
+            { id: "gasparzinho", nome: "Gasparzinho", sprite: "img/gasparzinho.png", tier: "standard" },
+            { id: "mario", nome: "Mário", sprite: "img/mario.png", tier: "world-cup" },
             { id: "elfa", nome: "Elfa", sprite: "img/elfa.png", tier: "standard" },
-            { id: "guerreiro", nome: "Guerreiro", sprite: "img/guerreiro.png", tier: "world-cup" },
-            { id: "ninja", nome: "Ninja", sprite: "img/ninja.png", tier: "standard" },
-            { id: "robo", nome: "Ciborgue", sprite: "img/robo.png", tier: "standard" },
-            { id: "vampiro", nome: "Vampiro", sprite: "img/vampiro.png", tier: "standard" },
+            { id: "hacker", nome: "Hacker", sprite: "img/hacker.png", tier: "standard" },
+            { id: "samurai", nome: "Samurai", sprite: "img/samurai.png", tier: "world-cup" },
+            { id: "pirata", nome: "Pirata", sprite: "img/pirata.png", tier: "standard" },
             { id: "fada", nome: "Fada", sprite: "img/fada.png", tier: "standard" },
-            { id: "pirata", nome: "Pirata", sprite: "img/pirata.png", tier: "world-cup" },
-            { id: "samurai", nome: "Samurai", sprite: "img/samurai.png", tier: "standard" },
-            { id: "hacker", nome: "Hacker", sprite: "img/hacker.png", tier: "standard" }
-            // Adicione quantos quiser aqui...
+            { id: "ninja", nome: "Ninja", sprite: "img/ninja.png", tier: "standard" },
+            { id: "vampiro", nome: "Vampiro", sprite: "img/vampiro.png", tier: "standard" },
+            { id: "mago_merlin", nome: "Mago Merlin", sprite: "img/mago_merlin.png", tier: "world-cup" },
+            { id: "ciborgue", nome: "Ciborgue", sprite: "img/ciborgue.png", tier: "standard" },
+            { id: "mirabel", nome: "Mirabel", sprite: "img/mirabel.png", tier: "standard" },
+            { id: "manny", nome: "Manny", sprite: "img/manny.png", tier: "world-cup" },
+            { id: "magico", nome: "Mágico", sprite: "img/magico.png", tier: "standard" },
+            { id: "scrat", nome: "Scrash", sprite: "img/scrash.png", tier: "standard" },
+            { id: "olaf", nome: "Olaf", sprite: "img/olaf.png", tier: "standard" },
+            { id: "caveira", nome: "Caveira", sprite: "img/caveira.png", tier: "standard" },
+            { id: "pinoquio", nome: "Pinóquio", sprite: "img/pinoquio.png", tier: "standard" }
         ];
 
         const gridContainer = document.getElementById('hero-grid');
