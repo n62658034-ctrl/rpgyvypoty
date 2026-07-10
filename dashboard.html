@@ -64,7 +64,6 @@
         #alerta-chegada { position: fixed; top: 15%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); border: 3px solid #ffd700; color: white; font-size: 24px; font-weight: bold; padding: 15px 30px; border-radius: 20px; z-index: 2000; display: none; text-align: center; box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5); animation: popIn 0.3s ease-out; }
         @keyframes popIn { 0% { transform: translate(-50%, -100%) scale(0.5); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
-        /* Ajuste de escala para comportar superpopulação */
         .player-lane { height: 3.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; position: relative; }
         .mover-wrapper { display: flex; align-items: center; gap: 3px; padding: 4px 8px; border-radius: 9999px; transition: transform 0.7s ease-out; }
 
@@ -72,9 +71,7 @@
         ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
         ::-webkit-scrollbar-thumb { background: rgba(255, 215, 0, 0.3); border-radius: 10px; }
 
-        /* =========================================
-           SISTEMA DE PUNIÇÃO DO ROBÔ E ANIMAÇÕES
-           ========================================= */
+        /* SISTEMA DE PUNIÇÃO DO ROBÔ E ANIMAÇÕES */
         #guardian-robot { position: absolute; right: 5%; top: 10%; z-index: 50; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
         
         .patrolling { animation: patrol 8s ease-in-out infinite alternate; }
@@ -133,7 +130,6 @@
         <div class="theme-layer bg-cyber" id="theme-cyber"><div class="grid-lines"></div><div class="neon-pulse" style="top: 15%"></div><div class="neon-pulse" style="top: 85%; animation-delay: 2s"></div></div>
     </div>
 
-    <!-- TELA DO PIN -->
     <div id="overlay-espera" class="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center transition-all duration-700 ease-in-out">
         <h2 class="text-5xl text-white font-bold mb-6 tracking-widest uppercase">ENTRE NA ARENA COM O PIN:</h2>
         <div class="text-[150px] font-black text-[#ffd700] tracking-widest drop-shadow-[0_0_50px_rgba(255,215,0,0.8)] leading-none mb-8" id="pin-gigante">---</div>
@@ -182,7 +178,6 @@
                 <span class="text-xl font-bold text-primary-fixed uppercase italic opacity-70 [writing-mode:vertical-lr] tracking-[0.2em]">Chegada</span>
             </div>
 
-            <!-- ROBÔ GUARDIÃO ONDE A MÁGICA ACONTECE -->
             <div id="guardian-robot" class="patrolling">
                 <div class="robot-wrapper" id="robot-body-wrapper">
                     <div class="robot-container">
@@ -195,7 +190,6 @@
                     </div>
                 </div>
             </div>
-            <!-- EXPLOSÃO -->
             <div id="explosion-effect" class="explosion"></div>
             
             <div class="relative w-full h-full p-2 flex flex-col gap-1 overflow-y-auto" id="race-container">
@@ -293,9 +287,9 @@
             }
         });
 
+        // EJEÇÃO CASO A SALA SEJA FECHADA / DELETADA
         onSnapshot(doc(db, "salas", salaPIN), (docSnap) => {
-            const dados = docSnap.data();
-            if (dados && dados.encerrada === true) {
+            if (!docSnap.exists() || (docSnap.data() && docSnap.data().encerrada === true)) {
                 document.body.innerHTML = '<div class="flex items-center justify-center h-screen bg-black text-white text-5xl uppercase tracking-widest text-[#ffd700] font-bold">AULA ENCERRADA PELO PROFESSOR</div>';
                 setTimeout(() => { window.location.href = "index.html"; }, 5000);
             }
@@ -357,6 +351,7 @@
                 const nome = change.doc.id;
                 let acertos = dados.acertos || 0;
                 let icone = dados.sprite || "⏳";
+                let erroTrigger = dados.erroTrigger || null; 
 
                 if(change.type === "removed") { location.reload(); return; }
 
@@ -377,7 +372,7 @@
                         </div>
                     `;
                     document.getElementById('race-container').appendChild(lane);
-                    players[nome] = { nome: nome, icone: icone, terminou: false, pontosAntigos: 0, alertado: false };
+                    players[nome] = { nome: nome, icone: icone, terminou: false, pontosAntigos: 0, alertado: false, ultimoErro: null };
                 } else {
                     document.getElementById(`avatar-container-${nome}`).innerHTML = processarAvatar(icone);
                     players[nome].icone = icone;
@@ -396,7 +391,9 @@
                     mostrarAlertaCruzamento(nome);
                 }
 
-                // DETECÇÃO DE ACERTO
+                // ===================================================
+                // O CHUTE DO ROBÔ (Ação baseada no Gatilho)
+                // ===================================================
                 if(acertos > players[nome].pontosAntigos && acertos > 0) {
                     const avatarBg = document.getElementById(`avatar-container-${nome}`);
                     avatarBg.classList.add("gold-glow");
@@ -404,8 +401,9 @@
                     som.currentTime = 0; som.play().catch(e => {});
                     setTimeout(() => avatarBg.classList.remove("gold-glow"), 800);
                 } 
-                // DETECÇÃO DE ERRO (PUNIÇÃO DO ROBÔ BOSS)
-                else if (acertos < players[nome].pontosAntigos) {
+                else if (erroTrigger && erroTrigger !== players[nome].ultimoErro) {
+                    players[nome].ultimoErro = erroTrigger; 
+                    
                     const avatarBg = document.getElementById(`avatar-container-${nome}`);
                     avatarBg.classList.add("spin-hit");
                     setTimeout(() => avatarBg.classList.remove("spin-hit"), 800);
@@ -418,7 +416,6 @@
                         const arenaRect = document.getElementById('arena').getBoundingClientRect();
                         const playerRect = moverElement.getBoundingClientRect();
 
-                        // O robô mira as coordenadas do jogador dentro da arena
                         const topPos = playerRect.top - arenaRect.top - 50; 
                         const rightPos = arenaRect.right - playerRect.right - 80;
 
@@ -426,18 +423,15 @@
                         robot.style.top = `${topPos}px`;
                         robot.style.right = `${rightPos}px`;
 
-                        // Temporizador do ataque do Boss
                         setTimeout(() => {
                             robotBody.classList.add('kick-anim');
                             
-                            // Explosão exatamente na colisão
                             explosion.style.left = `${playerRect.right - arenaRect.left}px`;
                             explosion.style.top = `${playerRect.top - arenaRect.top + (playerRect.height/2)}px`;
                             explosion.classList.remove('explode-anim');
-                            void explosion.offsetWidth; // Força recálculo do CSS
+                            void explosion.offsetWidth; 
                             explosion.classList.add('explode-anim');
 
-                            // Retorno do Boss à base
                             setTimeout(() => {
                                 robotBody.classList.remove('kick-anim');
                                 robot.style.top = '10%';
