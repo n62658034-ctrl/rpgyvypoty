@@ -143,8 +143,16 @@
         
         if (!nick || !salaPIN || !meuSprite) { window.location.href = "index.html"; }
 
-        // CHUTA O ALUNO SE O PROFESSOR ENCERRAR A AULA
+        // =====================================================================
+        // CHUTA O ALUNO SE A SALA FOR ENCERRADA OU DELETADA (Guia Fechada)
+        // =====================================================================
         onSnapshot(doc(db, "salas", salaPIN), (docSnap) => {
+            if (!docSnap.exists()) {
+                alert("O professor iniciou uma nova batalha ou fechou a sala. Até a próxima!");
+                localStorage.clear();
+                window.location.href = "index.html";
+                return;
+            }
             const dados = docSnap.data();
             if (dados && dados.encerrada === true) {
                 alert("O professor encerrou esta batalha. Até a próxima!");
@@ -210,17 +218,36 @@
 
             if (isCorrect) {
                 pontosAtuais += 1;
-                fb.innerText = "✨ RESPOSTA CORRETA"; fb.style.color = "#ffd700";
+                fb.innerText = "✨ RESPOSTA CORRETA!"; 
+                fb.style.color = "#ffd700";
             } else {
-                pontosAtuais = Math.max(0, pontosAtuais - 1);
-                fb.innerText = "❌ FALHA DETECTADA"; fb.style.color = "#ffb4ab";
+                // =========================================================
+                // LÓGICA DO CHECKPOINT: Não perde ponto se tiver 5 ou menos
+                // =========================================================
+                if (pontosAtuais > 5) {
+                    pontosAtuais -= 1; // Volta uma casa, mas nunca cai de 5
+                    if (pontosAtuais < 5) pontosAtuais = 5; // Segurança extra
+                }
+                fb.innerText = "❌ RESPOSTA INCORRETA!"; 
+                fb.style.color = "#ffb4ab";
             }
             
             document.getElementById('pontos-ui').innerText = pontosAtuais;
-            await updateDoc(refJogador, { acertos: pontosAtuais });
-            await addDoc(collection(db, "salas", salaPIN, "respostas"), {
-                nick, personagem: meuSprite, pergunta: enunciadoAtual, acertou: isCorrect, timestamp: new Date().toISOString()
-            });
+            
+            try {
+                // Salva os acertos e gera um "Gatilho" secreto se o aluno errar, 
+                // para que o Projetor saiba que o robô deve chutar, mesmo sem perder pontos!
+                await updateDoc(refJogador, { 
+                    acertos: pontosAtuais,
+                    erroTrigger: isCorrect ? null : Date.now() // Ativa o chute do robô
+                });
+                
+                await addDoc(collection(db, "salas", salaPIN, "respostas"), {
+                    nick, personagem: meuSprite, pergunta: enunciadoAtual, acertou: isCorrect, timestamp: new Date().toISOString()
+                });
+            } catch(e) {
+                console.warn("Conexão instável. Atualizando localmente.");
+            }
 
             setTimeout(() => { fb.innerText = ""; renderQuestion(); }, 2000);
         }
