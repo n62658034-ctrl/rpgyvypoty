@@ -49,7 +49,6 @@
         .btn-3d:active { transform: translateY(2px); }
         .char-spacing-widest { letter-spacing: 0.5em; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
-        
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #6200ea; border-radius: 4px; }
@@ -69,7 +68,6 @@
     </nav>
 
     <main class="min-h-screen pt-24 pb-12 px-gutter max-w-container-max mx-auto relative">
-        
         <section class="flex items-center justify-center min-h-[70vh]" id="setup-phase">
             <div class="glass-panel-heavy p-12 rounded-xl w-full max-w-xl text-center flex flex-col gap-8 animate-in fade-in zoom-in duration-500 rounded-full">
                 <div>
@@ -91,7 +89,6 @@
         </section>
 
         <section class="hidden grid grid-cols-12 gap-gutter" id="dashboard-phase">
-            
             <header class="col-span-12 glass-panel p-8 rounded-xl flex flex-wrap items-center justify-between gap-6 mb-4 rounded-full">
                 <div class="flex items-center gap-6">
                     <div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-fixed shadow-[0_0_15px_#ffd700]">
@@ -137,6 +134,12 @@
                             <label class="text-on-surface-variant font-label-sm">ENUNCIADO DA QUESTÃO</label>
                             <textarea id="txt-pergunta" class="w-full min-h-[120px] bg-black/40 border-b-2 border-secondary-container focus:border-primary-container text-white p-4 outline-none transition-all rounded-t-md rounded-xl" placeholder="Digite a pergunta para os jogadores..."></textarea>
                         </div>
+                        
+                        <div class="space-y-1">
+                            <label class="text-on-surface-variant font-label-sm">URL DA IMAGEM (OPCIONAL)</label>
+                            <input id="txt-imagem" class="w-full h-12 bg-black/40 border-b-2 border-secondary-container focus:border-primary-container text-white px-4 outline-none transition-all rounded-t-md rounded-xl text-sm placeholder:text-white/20" type="url" placeholder="Cole o link da imagem (ex: https://site.com/foto.jpg)" autocomplete="off">
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4">
                             <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary-fixed">A</span><input id="opt0" class="w-full h-12 bg-white/5 border border-white/10 rounded-sm pl-10 pr-4 focus:border-primary-fixed outline-none rounded-xl text-white" type="text" autocomplete="off"></div>
                             <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary-fixed">B</span><input id="opt1" class="w-full h-12 bg-white/5 border border-white/10 rounded-sm pl-10 pr-4 focus:border-primary-fixed outline-none rounded-xl text-white" type="text" autocomplete="off"></div>
@@ -163,7 +166,7 @@
                         <span class="material-symbols-outlined text-primary-fixed">upload_file</span>
                         <h4 class="font-label-lg text-white">Importar do Excel (.CSV)</h4>
                     </div>
-                    <p class="text-[11px] text-on-surface-variant leading-tight">Carregue sua planilha salva como formato .CSV. Colunas obrigatórias: Pergunta, OpçãoA, OpçãoB, OpçãoC, OpçãoD, RespostaCorreta (número de 0 a 3).</p>
+                    <p class="text-[11px] text-on-surface-variant leading-tight">Colunas na ordem: Pergunta, OpçãoA, OpçãoB, OpçãoC, OpçãoD, RespostaCorreta (0 a 3), <b class="text-primary-fixed">UrlDaImagem (Opcional)</b>.</p>
                     <input type="file" id="csv-file" accept=".csv" class="hidden" onchange="window.importarPlanilha(event)">
                     <button onclick="document.getElementById('csv-file').click()" class="w-full py-3 bg-secondary-container/20 text-secondary border border-secondary-container/40 font-label-sm uppercase tracking-wider rounded-full hover:bg-secondary-container/40 transition-all btn-3d">
                         Selecionar Planilha CSV
@@ -228,12 +231,13 @@
 
     <footer class="w-full py-6 mt-auto border-t border-white/5 flex flex-col items-center gap-4 px-margin-desktop bg-surface-container-lowest">
         <div class="text-primary-fixed font-black tracking-tighter">ARENA PRO</div>
-        <p class="font-label-sm text-label-sm text-on-surface-variant opacity-50 uppercase tracking-widest">© 2024 ARENA PRO E-SPORTS. ALL RIGHTS RESERVED.</p>
+        <p class="font-label-sm text-label-sm text-on-surface-variant opacity-50 uppercase tracking-widest">© 2026 ARENA PRO E-SPORTS. ALL RIGHTS RESERVED.</p>
     </footer>
 
     <script type="module">
+        // ATENÇÃO: 'writeBatch' foi importado aqui
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDocs, addDoc, collection, updateDoc, deleteDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDocs, addDoc, collection, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAtKHigv0ghzwzMilQ1y0NTebpmaI2yE2A",
@@ -261,10 +265,8 @@
 
             try {
                 const salasAntigas = await getDocs(query(collection(db, "salas"), where("professor", "==", profID), where("encerrada", "==", false)));
-                salasAntigas.forEach(async (d) => {
-                    await updateDoc(doc(db, "salas", d.id), { encerrada: true });
-                });
-            } catch(e) { console.log("Nenhuma sala fantasma encontrada."); }
+                salasAntigas.forEach(async (d) => { await updateDoc(doc(db, "salas", d.id), { encerrada: true }); });
+            } catch(e) { console.log("Nenhuma sala antiga encontrada."); }
 
             meuPIN = Math.floor(10000 + Math.random() * 90000).toString();
             
@@ -276,7 +278,6 @@
 
             document.getElementById('setup-phase').classList.add('hidden');
             document.getElementById('dashboard-phase').classList.remove('hidden');
-            
             document.getElementById('meuPIN').innerText = meuPIN;
             document.getElementById('session-theme').innerText = disciplina;
 
@@ -286,7 +287,10 @@
             resetarInatividade();
         }
 
-        window.importarPlanilha = (event) => {
+        // =========================================================================
+        // NOVO IMPORTADOR EXCEL (EM LOTE/BATCH) - Suporta quantidade infinita
+        // =========================================================================
+        window.importarPlanilha = async (event) => {
             const file = event.target.files[0];
             if (!file) return;
 
@@ -298,25 +302,47 @@
                 if (lines[0] && lines[0].includes(",")) delimitador = ",";
 
                 let contador = 0;
+                let batch = writeBatch(db); // Inicia o pacote de envios
+                let operacoesNoLote = 0;
+
                 for (let i = 0; i < lines.length; i++) {
                     if (!lines[i].trim()) continue;
                     const colunas = lines[i].split(delimitador);
+                    
                     if (colunas.length >= 6) {
                         const enunciado = colunas[0].replace(/"/g, "").trim();
                         const opcoes = [colunas[1].trim(), colunas[2].trim(), colunas[3].trim(), colunas[4].trim()];
                         const correta = parseInt(colunas[5].trim());
+                        const imagemUrl = colunas[6] ? colunas[6].replace(/"/g, "").trim() : null;
 
                         if (enunciado && opcoes[0] && !isNaN(correta)) {
-                            await addDoc(collection(db, "salas", meuPIN, "perguntas"), {
-                                enunciado: enunciado,
-                                opcoes: opcoes,
-                                correta: correta
-                            });
+                            let novaPergunta = { enunciado: enunciado, opcoes: opcoes, correta: correta };
+                            if (imagemUrl && imagemUrl.length > 5) novaPergunta.imagem = imagemUrl;
+
+                            // Prepara a pergunta para ser enviada no lote
+                            const novaRef = doc(collection(db, "salas", meuPIN, "perguntas"));
+                            batch.set(novaRef, novaPergunta);
+                            
                             contador++;
+                            operacoesNoLote++;
+
+                            // O Firebase aceita até 500 itens por pacote. Vamos mandar de 400 em 400.
+                            if (operacoesNoLote === 400) {
+                                await batch.commit(); // Dispara as 400 pro servidor de uma vez
+                                batch = writeBatch(db); // Abre um pacote novo
+                                operacoesNoLote = 0;
+                            }
                         }
                     }
                 }
-                alert(`Sucesso! ${contador} missões foram importadas e carregadas automaticamente.`);
+                
+                // Envia qualquer sobra que não completou 400
+                if (operacoesNoLote > 0) {
+                    await batch.commit();
+                }
+
+                alert(`Sucesso! ${contador} missões foram importadas instantaneamente.`);
+                event.target.value = ""; // Reseta o botão para permitir subir a mesma planilha de novo se necessário
             };
             reader.readAsText(file, "UTF-8");
         }
@@ -343,10 +369,15 @@
 
         window.salvarPergunta = async () => {
             const p = document.getElementById('txt-pergunta').value;
+            const img = document.getElementById('txt-imagem').value.trim();
             const opts = [document.getElementById('opt0').value, document.getElementById('opt1').value, document.getElementById('opt2').value, document.getElementById('opt3').value];
             const cor = parseInt(document.getElementById('select-correta').value);
+            
             if (!p || !opts[0] || !opts[1]) { alert("Preencha o enunciado e as opções!"); return; }
+            
             const dados = { enunciado: p, opcoes: opts, correta: cor };
+            if (img && img.length > 5) dados.imagem = img; // Anexa a imagem se tiver
+
             try {
                 if(editandoId) {
                     await updateDoc(doc(db, "salas", meuPIN, "perguntas", editandoId), dados);
@@ -356,7 +387,7 @@
                 } else {
                     await addDoc(collection(db, "salas", meuPIN, "perguntas"), dados);
                 }
-                ['txt-pergunta', 'opt0', 'opt1', 'opt2', 'opt3'].forEach(id => document.getElementById(id).value = "");
+                ['txt-pergunta', 'txt-imagem', 'opt0', 'opt1', 'opt2', 'opt3'].forEach(id => document.getElementById(id).value = "");
             } catch(e) { alert("Erro ao salvar."); }
         }
 
@@ -365,30 +396,39 @@
                 const painel = document.getElementById('lista-render');
                 document.getElementById('contador-perguntas').innerText = snapshot.docs.length;
                 painel.innerHTML = "";
+                
                 if(snapshot.empty) { painel.innerHTML = "<p class='text-on-surface-variant text-sm text-center py-4'>Nenhuma missão cadastrada.</p>"; return; }
+                
                 snapshot.forEach((docSnap) => {
                     const q = docSnap.data(); const id = docSnap.id;
+                    const temImg = q.imagem ? `<span class="material-symbols-outlined text-[10px] text-blue-400 ml-1" title="Contém Imagem">image</span>` : '';
+                    
                     const div = document.createElement('div');
                     div.className = "p-3 bg-white/5 rounded border-l-4 border-success flex justify-between items-center group transition-colors hover:bg-white/10 rounded-lg";
                     div.innerHTML = `
-                        <span class="text-sm truncate pr-4 text-white">${q.enunciado} <span class="text-[10px] text-success ml-2">(Correta: ${['A','B','C','D'][q.correta]})</span></span>
+                        <span class="text-sm truncate pr-4 text-white flex items-center">${q.enunciado} ${temImg} <span class="text-[10px] text-success ml-2">(Correta: ${['A','B','C','D'][q.correta]})</span></span>
                         <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span class="material-symbols-outlined text-sm text-primary-fixed cursor-pointer hover:scale-110" onclick="window.editarPergunta('${id}', '${q.enunciado.replace(/'/g, "\\'")}', '${q.opcoes[0]}', '${q.opcoes[1]}', '${q.opcoes[2]}', '${q.opcoes[3]}', ${q.correta})">edit</span>
+                            <span class="material-symbols-outlined text-sm text-primary-fixed cursor-pointer hover:scale-110 btn-editar" data-id="${id}">edit</span>
                             <span class="material-symbols-outlined text-sm text-danger cursor-pointer hover:scale-110" onclick="window.deletarPergunta('${id}')">delete</span>
                         </div>
                     `;
                     painel.appendChild(div);
+
+                    // Adiciona evento via JS para não quebrar com aspas simples nos textos
+                    div.querySelector('.btn-editar').onclick = () => {
+                        editandoId = id; 
+                        document.getElementById('txt-pergunta').value = q.enunciado;
+                        document.getElementById('txt-imagem').value = q.imagem || "";
+                        document.getElementById('opt0').value = q.opcoes[0] || ""; 
+                        document.getElementById('opt1').value = q.opcoes[1] || "";
+                        document.getElementById('opt2').value = q.opcoes[2] || ""; 
+                        document.getElementById('opt3').value = q.opcoes[3] || "";
+                        document.getElementById('select-correta').value = q.correta;
+                        document.getElementById('titulo-form').innerText = "Editar Missão";
+                        document.getElementById('btnSalvar').innerText = "ATUALIZAR PERGUNTA";
+                    };
                 });
             });
-        }
-
-        window.editarPergunta = (id, en, o0, o1, o2, o3, cor) => {
-            editandoId = id; document.getElementById('txt-pergunta').value = en;
-            document.getElementById('opt0').value = o0; document.getElementById('opt1').value = o1;
-            document.getElementById('opt2').value = o2; document.getElementById('opt3').value = o3;
-            document.getElementById('select-correta').value = cor;
-            document.getElementById('titulo-form').innerText = "Editar Missão";
-            document.getElementById('btnSalvar').innerText = "ATUALIZAR PERGUNTA";
         }
 
         window.deletarPergunta = async (id) => { if(confirm("Deletar pergunta?")) await deleteDoc(doc(db, "salas", meuPIN, "perguntas", id)); }
