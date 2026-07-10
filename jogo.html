@@ -36,7 +36,7 @@
     </script>
     
     <style>
-        /* CORREÇÃO DO SCROLL: Agora a página rola na vertical se o conteúdo for longo */
+        /* CORREÇÃO DO SCROLL: A página rola na vertical se o conteúdo for longo */
         body { 
             background-color: #000; 
             margin: 0; 
@@ -45,7 +45,6 @@
             overflow-y: auto; 
         }
 
-        /* Cyber Background animado - O hidden fica apenas aqui para o fundo não vazar */
         .cyber-bg { 
             position: fixed; 
             inset: 0; 
@@ -198,7 +197,6 @@
             q.opcoes.forEach((opt, idx) => {
                 const btn = document.createElement('button'); 
                 btn.className = "option-btn w-full p-4 sm:p-6 rounded-lg text-left font-bold text-on-surface hover:text-primary flex justify-between items-center group";
-                // CORREÇÃO: "break-words" garante que o texto quebre linhas e não fuja da tela
                 btn.innerHTML = `<span class="break-words w-full pr-4 leading-snug">${opt}</span><span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity shrink-0">arrow_forward</span>`;
                 btn.onclick = () => check(idx, q.correta, q.enunciado);
                 container.appendChild(btn);
@@ -235,11 +233,11 @@
             document.getElementById('pontos-ui').innerText = pontosAtuais;
             
             try {
-                // Salva os acertos e gera um "Gatilho" secreto se o aluno errar, 
-                // para que o Projetor saiba que o robô deve chutar, mesmo sem perder pontos!
+                // Salva os acertos e gera o "Gatilho" de erro no Firebase, 
+                // para que o Projetor saiba que o robô deve chutar.
                 await updateDoc(refJogador, { 
                     acertos: pontosAtuais,
-                    erroTrigger: isCorrect ? null : Date.now() // Ativa o chute do robô
+                    erroTrigger: isCorrect ? null : Date.now() 
                 });
                 
                 await addDoc(collection(db, "salas", salaPIN, "respostas"), {
