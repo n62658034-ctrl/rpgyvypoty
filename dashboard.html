@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>ARENA PRO - LIVE RACE</title>
+    <title>ARENA PRO - LIVE RACE COM BOSS</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -71,6 +71,51 @@
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
         ::-webkit-scrollbar-thumb { background: rgba(255, 215, 0, 0.3); border-radius: 10px; }
+
+        /* =========================================
+           SISTEMA DE PUNIÇÃO DO ROBÔ E ANIMAÇÕES
+           ========================================= */
+        #guardian-robot { position: absolute; right: 5%; top: 10%; z-index: 50; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        
+        .patrolling { animation: patrol 8s ease-in-out infinite alternate; }
+        @keyframes patrol { 0% { top: 5%; } 50% { top: 75%; } 100% { top: 20%; } }
+
+        .robot-wrapper { transform: scale(0.35); transform-origin: right center; position: relative; }
+        .robot-container { position: relative; width: 150px; height: 160px; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+
+        .robot-ear { position: absolute; top: 40px; width: 15px; height: 35px; background: #94a3b8; border: 4px solid #1e293b; }
+        .ear-left { left: 12px; border-radius: 10px 0 0 10px; border-right: 0; }
+        .ear-right { right: 12px; border-radius: 0 10px 10px 0; border-left: 0; }
+
+        .robot-head { position: absolute; top: 0; left: 25px; width: 100px; height: 85px; background: #1e293b; border-radius: 45px 45px 25px 25px; border: 5px solid #ef4444; z-index: 10; box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);}
+        .robot-visor { position: absolute; top: 25px; left: 10px; width: 70px; height: 35px; background: #000; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 12px; overflow: hidden; border: 2px solid #ef4444;}
+        
+        .robot-eye { width: 18px; height: 8px; background: #ef4444; border-radius: 4px; animation: blink 4s infinite; box-shadow: 0 0 10px #ef4444; transform: rotate(15deg); }
+        .robot-eye:last-child { transform: rotate(-15deg); }
+        @keyframes blink { 0%, 94%, 98% { transform: scaleY(1) rotate(15deg); } 96%, 100% { transform: scaleY(0.1) rotate(15deg); } }
+
+        .robot-arm { position: absolute; top: 90px; width: 25px; height: 60px; background: #1e293b; border-radius: 15px; border: 5px solid #ef4444; z-index: 1; }
+        .arm-left { left: 15px; transform: rotate(30deg); transform-origin: top center; animation: swing-l 1s infinite;}
+        .arm-right { right: 15px; transform: rotate(-30deg); transform-origin: top center; animation: swing-r 1s infinite;}
+        @keyframes swing-l { 0%, 100% { transform: rotate(30deg); } 50% { transform: rotate(50deg); } }
+        @keyframes swing-r { 0%, 100% { transform: rotate(-30deg); } 50% { transform: rotate(-50deg); } }
+
+        .robot-body { position: absolute; top: 75px; left: 35px; width: 80px; height: 75px; background: #1e293b; border-radius: 20px 20px 35px 35px; border: 5px solid #ef4444; z-index: 5; display: flex; justify-content: center; }
+        .robot-core { margin-top: 25px; width: 25px; height: 25px; background: #ef4444; border-radius: 50%; border: 4px solid #000; animation: pulse-core 1s infinite; }
+        @keyframes pulse-core { 0%, 100% { transform: scale(1); box-shadow: 0 0 10px #ef4444; } 50% { transform: scale(1.3); box-shadow: 0 0 30px #ef4444; } }
+
+        .kick-anim { transform: scale(0.4) rotate(-25deg) translateX(-50px) !important; }
+        .explosion { position: absolute; width: 100px; height: 100px; background: radial-gradient(circle, #fff, #ffd700, #ef4444, transparent); border-radius: 50%; opacity: 0; pointer-events: none; z-index: 100; transform: translate(-50%, -50%) scale(0); }
+        .explode-anim { animation: boom 0.5s ease-out forwards; }
+        @keyframes boom { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0); } 50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.5); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(2); } }
+
+        .spin-hit { animation: get-hit 0.8s cubic-bezier(0.5, 0, 0.1, 1) forwards; }
+        @keyframes get-hit { 
+            0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 20px red) hue-rotate(90deg) brightness(2); } 
+            50% { transform: rotate(-360deg) scale(0.5); filter: drop-shadow(0 0 40px red) hue-rotate(90deg) brightness(3); } 
+            100% { transform: rotate(-720deg) scale(1); filter: none; } 
+        }
     </style>
 </head>
 <body class="bg-transparent text-white min-h-screen flex flex-col">
@@ -88,7 +133,7 @@
         <div class="theme-layer bg-cyber" id="theme-cyber"><div class="grid-lines"></div><div class="neon-pulse" style="top: 15%"></div><div class="neon-pulse" style="top: 85%; animation-delay: 2s"></div></div>
     </div>
 
-    <!-- TELA DO PIN CORRIGIDA: Usa opacity-0 e hidden para garantir que desapareça -->
+    <!-- TELA DO PIN -->
     <div id="overlay-espera" class="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center transition-all duration-700 ease-in-out">
         <h2 class="text-5xl text-white font-bold mb-6 tracking-widest uppercase">ENTRE NA ARENA COM O PIN:</h2>
         <div class="text-[150px] font-black text-[#ffd700] tracking-widest drop-shadow-[0_0_50px_rgba(255,215,0,0.8)] leading-none mb-8" id="pin-gigante">---</div>
@@ -136,6 +181,22 @@
             <div class="absolute top-8 left-[91%] z-20">
                 <span class="text-xl font-bold text-primary-fixed uppercase italic opacity-70 [writing-mode:vertical-lr] tracking-[0.2em]">Chegada</span>
             </div>
+
+            <!-- ROBÔ GUARDIÃO ONDE A MÁGICA ACONTECE -->
+            <div id="guardian-robot" class="patrolling">
+                <div class="robot-wrapper" id="robot-body-wrapper">
+                    <div class="robot-container">
+                        <div class="robot-ear ear-left"></div>
+                        <div class="robot-ear ear-right"></div>
+                        <div class="robot-head"><div class="robot-visor"><div class="robot-eye"></div><div class="robot-eye"></div></div></div>
+                        <div class="robot-arm arm-left"></div>
+                        <div class="robot-arm arm-right"></div>
+                        <div class="robot-body"><div class="robot-core"></div></div>
+                    </div>
+                </div>
+            </div>
+            <!-- EXPLOSÃO -->
+            <div id="explosion-effect" class="explosion"></div>
             
             <div class="relative w-full h-full p-2 flex flex-col gap-1 overflow-y-auto" id="race-container">
                 <div class="absolute inset-0 grid grid-cols-12 pointer-events-none opacity-10 z-0">
@@ -193,6 +254,8 @@
         if(!salaPIN) { alert("Erro de conexão."); window.location.href = "index.html"; }
         document.getElementById('pin-gigante').innerText = salaPIN;
 
+        window.robotBusy = false; // Controle para evitar ataques simultâneos do robô
+
         function updateTheme() {
             let activeTheme = localStorage.getItem("temaAtivo") || 'cyber';
             const themeMap = {
@@ -213,21 +276,18 @@
         document.body.addEventListener('click', () => { document.getElementById("som-ponto").load(); }, { once: true });
 
         const players = {};
-        const META_PONTOS = 12; // META ATUALIZADA PARA 12
+        const META_PONTOS = 12;
         let vencedores = []; 
         let podioExibido = false;
 
-        // CONTROLE BLINDADO DA TELA DE ESPERA
         onSnapshot(doc(db, "salas", salaPIN, "configuracao", "estado"), (docSnap) => {
             const dados = docSnap.data();
             const overlay = document.getElementById('overlay-espera');
             
             if (dados && dados.jogando === true) {
-                // Esconde a tela de PIN (Remove clique e fica invisível)
                 overlay.classList.add('opacity-0', 'pointer-events-none');
                 setTimeout(() => { overlay.classList.add('hidden'); }, 700);
             } else {
-                // Mostra a tela de PIN
                 overlay.classList.remove('hidden');
                 setTimeout(() => { overlay.classList.remove('opacity-0', 'pointer-events-none'); }, 50);
             }
@@ -326,28 +386,74 @@
                 const moverElement = document.getElementById(`mover-${nome}`);
                 document.getElementById(`score-${nome}`).innerText = acertos;
                 
-                // Distribuição da régua: 11 acertos encosta na linha (90vw)
                 let posPercent = (acertos / 11) * 90;
-                if (acertos >= 12) posPercent = 94; // Passa a linha na vitória
-                
+                if (acertos >= 12) posPercent = 94;
                 moverElement.style.transform = `translateX(${posPercent}vw)`;
 
-                // ALERTA DE CRUZAMENTO NO ACERTO 11
+                // ALERTA DE CRUZAMENTO
                 if (acertos === 11 && !players[nome].alertado) {
                     players[nome].alertado = true;
                     mostrarAlertaCruzamento(nome);
                 }
 
+                // DETECÇÃO DE ACERTO
                 if(acertos > players[nome].pontosAntigos && acertos > 0) {
                     const avatarBg = document.getElementById(`avatar-container-${nome}`);
                     avatarBg.classList.add("gold-glow");
                     const som = document.getElementById("som-ponto");
                     som.currentTime = 0; som.play().catch(e => {});
                     setTimeout(() => avatarBg.classList.remove("gold-glow"), 800);
+                } 
+                // DETECÇÃO DE ERRO (PUNIÇÃO DO ROBÔ BOSS)
+                else if (acertos < players[nome].pontosAntigos) {
+                    const avatarBg = document.getElementById(`avatar-container-${nome}`);
+                    avatarBg.classList.add("spin-hit");
+                    setTimeout(() => avatarBg.classList.remove("spin-hit"), 800);
+
+                    if (!window.robotBusy) {
+                        window.robotBusy = true;
+                        const robot = document.getElementById('guardian-robot');
+                        const robotBody = document.getElementById('robot-body-wrapper');
+                        const explosion = document.getElementById('explosion-effect');
+                        const arenaRect = document.getElementById('arena').getBoundingClientRect();
+                        const playerRect = moverElement.getBoundingClientRect();
+
+                        // O robô mira as coordenadas do jogador dentro da arena
+                        const topPos = playerRect.top - arenaRect.top - 50; 
+                        const rightPos = arenaRect.right - playerRect.right - 80;
+
+                        robot.classList.remove('patrolling');
+                        robot.style.top = `${topPos}px`;
+                        robot.style.right = `${rightPos}px`;
+
+                        // Temporizador do ataque do Boss
+                        setTimeout(() => {
+                            robotBody.classList.add('kick-anim');
+                            
+                            // Explosão exatamente na colisão
+                            explosion.style.left = `${playerRect.right - arenaRect.left}px`;
+                            explosion.style.top = `${playerRect.top - arenaRect.top + (playerRect.height/2)}px`;
+                            explosion.classList.remove('explode-anim');
+                            void explosion.offsetWidth; // Força recálculo do CSS
+                            explosion.classList.add('explode-anim');
+
+                            // Retorno do Boss à base
+                            setTimeout(() => {
+                                robotBody.classList.remove('kick-anim');
+                                robot.style.top = '10%';
+                                robot.style.right = '5%';
+                                
+                                setTimeout(() => {
+                                    robot.classList.add('patrolling');
+                                    window.robotBusy = false;
+                                }, 400);
+                            }, 500);
+                        }, 400);
+                    }
                 }
                 players[nome].pontosAntigos = acertos;
 
-                // VITÓRIA OFICIAL NO ACERTO 12
+                // VITÓRIA OFICIAL
                 if (acertos >= META_PONTOS && !players[nome].terminou) {
                     players[nome].terminou = true;
                     vencedores.push({ nome: nome, icone: icone });
