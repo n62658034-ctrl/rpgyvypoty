@@ -36,7 +36,6 @@
     </script>
     
     <style>
-        /* CORREÇÃO DO SCROLL: A página rola na vertical se o conteúdo for longo */
         body { 
             background-color: #000; 
             margin: 0; 
@@ -107,6 +106,8 @@
             </div>
             
             <div id="tela-quiz" style="display: none;">
+                <div id="img-container" class="w-full mb-6 hidden flex justify-center"></div>
+                
                 <p class="text-lg sm:text-xl font-bold mb-8 leading-relaxed text-white tracking-tight" id="txt-pergunta"></p>
                 
                 <div class="grid grid-cols-1 gap-4" id="btn-options"></div>
@@ -142,19 +143,9 @@
         
         if (!nick || !salaPIN || !meuSprite) { window.location.href = "index.html"; }
 
-        // =====================================================================
-        // CHUTA O ALUNO SE A SALA FOR ENCERRADA OU DELETADA (Guia Fechada)
-        // =====================================================================
         onSnapshot(doc(db, "salas", salaPIN), (docSnap) => {
-            if (!docSnap.exists()) {
+            if (!docSnap.exists() || (docSnap.data() && docSnap.data().encerrada === true)) {
                 alert("O professor iniciou uma nova batalha ou fechou a sala. Até a próxima!");
-                localStorage.clear();
-                window.location.href = "index.html";
-                return;
-            }
-            const dados = docSnap.data();
-            if (dados && dados.encerrada === true) {
-                alert("O professor encerrou esta batalha. Até a próxima!");
                 localStorage.clear();
                 window.location.href = "index.html";
             }
@@ -191,6 +182,17 @@
         function renderQuestion() {
             if (perguntas.length === 0) { document.getElementById('txt-pergunta').innerText = "Missões concluídas!"; document.getElementById('btn-options').innerHTML = ""; return; }
             const q = perguntas[Math.floor(Math.random() * perguntas.length)];
+            
+            // INJETANDO A IMAGEM (Caso a pergunta tenha sido salva com URL)
+            const imgContainer = document.getElementById('img-container');
+            if (q.imagem) {
+                imgContainer.innerHTML = `<img src="${q.imagem}" class="max-h-48 sm:max-h-56 w-auto object-contain rounded-lg border border-white/10 shadow-lg" alt="Imagem da Missão">`;
+                imgContainer.classList.remove('hidden');
+            } else {
+                imgContainer.innerHTML = "";
+                imgContainer.classList.add('hidden');
+            }
+
             document.getElementById('txt-pergunta').innerText = q.enunciado;
             const container = document.getElementById('btn-options'); container.innerHTML = "";
             
@@ -219,12 +221,9 @@
                 fb.innerText = "✨ RESPOSTA CORRETA!"; 
                 fb.style.color = "#ffd700";
             } else {
-                // =========================================================
-                // LÓGICA DO CHECKPOINT: Não perde ponto se tiver 5 ou menos
-                // =========================================================
                 if (pontosAtuais > 5) {
-                    pontosAtuais -= 1; // Volta uma casa, mas nunca cai de 5
-                    if (pontosAtuais < 5) pontosAtuais = 5; // Segurança extra
+                    pontosAtuais -= 1; 
+                    if (pontosAtuais < 5) pontosAtuais = 5; 
                 }
                 fb.innerText = "❌ RESPOSTA INCORRETA!"; 
                 fb.style.color = "#ffb4ab";
@@ -233,8 +232,6 @@
             document.getElementById('pontos-ui').innerText = pontosAtuais;
             
             try {
-                // Salva os acertos e gera o "Gatilho" de erro no Firebase, 
-                // para que o Projetor saiba que o robô deve chutar.
                 await updateDoc(refJogador, { 
                     acertos: pontosAtuais,
                     erroTrigger: isCorrect ? null : Date.now() 
