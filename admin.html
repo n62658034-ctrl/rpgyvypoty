@@ -136,8 +136,18 @@
                         </div>
                         
                         <div class="space-y-1">
-                            <label class="text-on-surface-variant font-label-sm">URL DA IMAGEM (OPCIONAL)</label>
-                            <input id="txt-imagem" class="w-full h-12 bg-black/40 border-b-2 border-secondary-container focus:border-primary-container text-white px-4 outline-none transition-all rounded-t-md rounded-xl text-sm placeholder:text-white/20" type="url" placeholder="Cole o link da imagem (ex: https://site.com/foto.jpg)" autocomplete="off">
+                            <label class="text-on-surface-variant font-label-sm flex justify-between">
+                                <span>IMAGEM DA QUESTÃO (OPCIONAL)</span>
+                                <span id="img-status" class="text-[10px] text-success font-bold hidden">IMAGEM CARREGADA E REDUZIDA!</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <input id="txt-imagem" class="flex-grow h-12 bg-black/40 border-b-2 border-secondary-container focus:border-primary-container text-white px-4 outline-none transition-all rounded-t-md rounded-xl text-sm placeholder:text-white/20" type="text" placeholder="Cole um link ou arraste uma foto no botão ➡️" autocomplete="off">
+                                
+                                <div class="relative w-12 h-12 bg-secondary-container/20 border-2 border-dashed border-secondary-container/50 rounded-xl flex items-center justify-center hover:bg-secondary-container/40 hover:border-primary-container cursor-pointer transition-all shrink-0 group overflow-hidden" title="Arraste uma foto aqui ou clique">
+                                    <span class="material-symbols-outlined text-secondary-container group-hover:text-primary-container pointer-events-none transition-colors" id="img-icon">add_photo_alternate</span>
+                                    <input type="file" id="file-img" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                </div>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
@@ -235,7 +245,6 @@
     </footer>
 
     <script type="module">
-        // ATENÇÃO: 'writeBatch' foi importado aqui
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, setDoc, getDocs, addDoc, collection, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -258,6 +267,45 @@
         let meuPIN = "";
         let jogoRodando = false;
         let editandoId = null;
+
+        // =========================================================================
+        // PROCESSADOR DE IMAGENS: Comprime e converte foto para texto instantaneamente
+        // =========================================================================
+        document.getElementById('file-img').addEventListener('change', function(e) {
+            if(this.files && this.files[0]) {
+                const file = this.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 500; // Encolhe a foto para caber no celular sem pesar
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Transforma em texto codificado (Base64) - Qualidade 70%
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        document.getElementById('txt-imagem').value = dataUrl;
+                        document.getElementById('img-status').classList.remove('hidden');
+                        document.getElementById('img-icon').innerText = 'check_circle';
+                        document.getElementById('img-icon').classList.replace('text-secondary-container', 'text-success');
+                    }
+                    img.src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
 
         window.gerarSala = async () => {
             const disciplina = document.getElementById('nome-disciplina').value.trim();
@@ -287,9 +335,6 @@
             resetarInatividade();
         }
 
-        // =========================================================================
-        // NOVO IMPORTADOR EXCEL (EM LOTE/BATCH) - Suporta quantidade infinita
-        // =========================================================================
         window.importarPlanilha = async (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -302,7 +347,7 @@
                 if (lines[0] && lines[0].includes(",")) delimitador = ",";
 
                 let contador = 0;
-                let batch = writeBatch(db); // Inicia o pacote de envios
+                let batch = writeBatch(db); 
                 let operacoesNoLote = 0;
 
                 for (let i = 0; i < lines.length; i++) {
@@ -319,30 +364,27 @@
                             let novaPergunta = { enunciado: enunciado, opcoes: opcoes, correta: correta };
                             if (imagemUrl && imagemUrl.length > 5) novaPergunta.imagem = imagemUrl;
 
-                            // Prepara a pergunta para ser enviada no lote
                             const novaRef = doc(collection(db, "salas", meuPIN, "perguntas"));
                             batch.set(novaRef, novaPergunta);
                             
                             contador++;
                             operacoesNoLote++;
 
-                            // O Firebase aceita até 500 itens por pacote. Vamos mandar de 400 em 400.
                             if (operacoesNoLote === 400) {
-                                await batch.commit(); // Dispara as 400 pro servidor de uma vez
-                                batch = writeBatch(db); // Abre um pacote novo
+                                await batch.commit();
+                                batch = writeBatch(db);
                                 operacoesNoLote = 0;
                             }
                         }
                     }
                 }
                 
-                // Envia qualquer sobra que não completou 400
                 if (operacoesNoLote > 0) {
                     await batch.commit();
                 }
 
                 alert(`Sucesso! ${contador} missões foram importadas instantaneamente.`);
-                event.target.value = ""; // Reseta o botão para permitir subir a mesma planilha de novo se necessário
+                event.target.value = ""; 
             };
             reader.readAsText(file, "UTF-8");
         }
@@ -376,7 +418,7 @@
             if (!p || !opts[0] || !opts[1]) { alert("Preencha o enunciado e as opções!"); return; }
             
             const dados = { enunciado: p, opcoes: opts, correta: cor };
-            if (img && img.length > 5) dados.imagem = img; // Anexa a imagem se tiver
+            if (img && img.length > 5) dados.imagem = img; 
 
             try {
                 if(editandoId) {
@@ -387,7 +429,14 @@
                 } else {
                     await addDoc(collection(db, "salas", meuPIN, "perguntas"), dados);
                 }
+                
+                // Reseta tudo após salvar
                 ['txt-pergunta', 'txt-imagem', 'opt0', 'opt1', 'opt2', 'opt3'].forEach(id => document.getElementById(id).value = "");
+                document.getElementById('img-status').classList.add('hidden');
+                document.getElementById('img-icon').innerText = 'add_photo_alternate';
+                document.getElementById('img-icon').classList.replace('text-success', 'text-secondary-container');
+                document.getElementById('file-img').value = "";
+                
             } catch(e) { alert("Erro ao salvar."); }
         }
 
@@ -414,7 +463,6 @@
                     `;
                     painel.appendChild(div);
 
-                    // Adiciona evento via JS para não quebrar com aspas simples nos textos
                     div.querySelector('.btn-editar').onclick = () => {
                         editandoId = id; 
                         document.getElementById('txt-pergunta').value = q.enunciado;
@@ -426,6 +474,13 @@
                         document.getElementById('select-correta').value = q.correta;
                         document.getElementById('titulo-form').innerText = "Editar Missão";
                         document.getElementById('btnSalvar').innerText = "ATUALIZAR PERGUNTA";
+                        
+                        // Atualiza icone se tiver imagem
+                        if(q.imagem) {
+                            document.getElementById('img-status').classList.remove('hidden');
+                            document.getElementById('img-icon').innerText = 'check_circle';
+                            document.getElementById('img-icon').classList.replace('text-secondary-container', 'text-success');
+                        }
                     };
                 });
             });
